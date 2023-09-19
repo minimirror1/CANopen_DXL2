@@ -30,4 +30,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>Component/cpp_DXL_SDK</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_DXL_SDK</locationURI>
+		</link>
+	</linkedResources>
 </projectDescription>

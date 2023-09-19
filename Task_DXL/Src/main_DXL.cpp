@@ -16,9 +16,11 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* Robotis -------------------------------------------------------------------*/
+/* User Task -----------------------------------------------------------------*/
 #include "main_DXL.h"
 
+/* Robotis SDK ---------------------------------------------------------------*/
+#include "DynamixelSDK.h"
 
 void main_DXL(void *argument){
 
