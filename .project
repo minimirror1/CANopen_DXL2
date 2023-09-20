@@ -47,6 +47,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_tick</locationURI>
 		</link>
 		<link>
+			<name>Component/gm_motion_CANprotocol</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/driver/gm_motion_CANprotocol</locationURI>
+		</link>
+		<link>
 			<name>Task_DXL/cpp_DXL_Class</name>
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_DXL_Class</locationURI>

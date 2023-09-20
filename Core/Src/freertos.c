@@ -49,6 +49,7 @@
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId DXL_TaskHandle;
+osThreadId MRS_TaskHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -57,6 +58,7 @@ osThreadId DXL_TaskHandle;
 
 void StartDefaultTask(void const * argument);
 extern void main_DXL(void const * argument);
+extern void main_MRS(void const * argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -110,6 +112,10 @@ void MX_FREERTOS_Init(void) {
   /* definition and creation of DXL_Task */
   osThreadDef(DXL_Task, main_DXL, osPriorityIdle, 0, 1024);
   DXL_TaskHandle = osThreadCreate(osThread(DXL_Task), NULL);
+
+  /* definition and creation of MRS_Task */
+  osThreadDef(MRS_Task, main_MRS, osPriorityIdle, 0, 1024);
+  MRS_TaskHandle = osThreadCreate(osThread(MRS_Task), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

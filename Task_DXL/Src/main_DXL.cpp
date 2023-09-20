@@ -45,20 +45,6 @@ void main_DXL(void *argument){
 	Serial_1_Init();
 	Serial_2_Init();
 
-	dynamixel::PortHandler *portHandler1 =
-			dynamixel::PortHandler::getPortHandler(DEVICENAME, &serial1);
-
-	dynamixel::PacketHandler *packetHandler1 =
-			dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION2);
-
-	dynamixel::PortHandler *portHandler2 =
-			dynamixel::PortHandler::getPortHandler(DEVICENAME, &serial2);
-
-	dynamixel::PacketHandler *packetHandler2 =
-			dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION2);
-
-	//motorDXL dxl_1(portHandler1, packetHandler1, 1, 4);
-	//motorDXL dxl_2(portHandler2, packetHandler2, 5, 10);
 	motorDXL dxl_1(&serial1, PROTOCOL_VERSION2, 1, 10);
 	motorDXL dxl_2(&serial2, PROTOCOL_VERSION2, 1, 10);
 

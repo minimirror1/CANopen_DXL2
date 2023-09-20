@@ -40,6 +40,13 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/cpp_serial}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/cpp_tick}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_DXL/cpp_DXL_Class}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_APP/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_DL/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_NET/PDA/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_NET/PHA/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_NET/PHD/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_PRTC/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_MRS/Inc}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.1689780813" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
 							</tool>
@@ -67,6 +74,13 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/cpp_serial}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/cpp_tick}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_DXL/cpp_DXL_Class}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_APP/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_DL/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_NET/PDA/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_NET/PHA/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_NET/PHD/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_PRTC/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_MRS/Inc}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.714348412" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -94,6 +108,13 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/cpp_serial}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/cpp_tick}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_DXL/cpp_DXL_Class}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_APP/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_DL/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_NET/PDA/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_NET/PHA/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_NET/PHD/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_PRTC/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_MRS/Inc}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.1651305292" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp"/>
 							</tool>
@@ -118,9 +139,10 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Task_DXL"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Task_MRS"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -154,7 +176,7 @@
 							<builder buildPath="${workspace_loc:/CANopen_DXL2}/Release" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder.1033971684" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.builder"/>
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.1660361549" name="MCU GCC Assembler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler">
 								<option id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.option.debuglevel.1882553074" name="Debug level" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.option.debuglevel" value="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.option.debuglevel.value.g0" valueType="enumerated"/>
-								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.option.definedsymbols.173727422" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.option.definedsymbols" valueType="definedSymbols">
+								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.option.definedsymbols.173727422" name="Define symbols (-D)" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.option.definedsymbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="STM32"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.1068268068" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
@@ -220,9 +242,10 @@
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Task_DXL"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Task_MRS"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

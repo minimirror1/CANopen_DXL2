@@ -105,6 +105,17 @@ void Error_Handler(void);
 #define LD_ZER_ERR_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
+#define MASTER_CAN_ID 0
+
+/*----------------------------------------------------------------------------*/
+#define CAN_Q_BUFF_SIZE 	512   //  ((id 4 Byte + data 8 Byte) x 512(CAN_Q_BUFF_SIZE)) x 2(rx,tx) = 12,288 Byte
+// CAN 1개일 경우
+#define CAN_1	0 //
+#define CAN_CNT 1
+
+void HAL_CAN_RxFifo0MsgPendingCallback1(CAN_HandleTypeDef *hcan);
+#include "dl_can.h"
+#include "net_phd_pid.h"
 
 /* USER CODE END Private defines */
 
