@@ -15,6 +15,13 @@ extern "C" {
 
 void main_MRS(void *argument);
 
+
+typedef struct _MotionPacket_TypeDef{
+	uint8_t gid;
+	uint8_t sid;
+	uint32_t posi;
+}MotionPacket_TypeDef;
+
 #ifdef __cplusplus
 }
 #endif

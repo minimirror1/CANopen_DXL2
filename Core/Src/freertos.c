@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "main_MRS.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,36 +47,48 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-osThreadId defaultTaskHandle;
-osThreadId DXL_TaskHandle;
-osThreadId MRS_TaskHandle;
+/* Definitions for defaultTask */
+osThreadId_t defaultTaskHandle;
+const osThreadAttr_t defaultTask_attributes = {
+  .name = "defaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for DXL_Task */
+osThreadId_t DXL_TaskHandle;
+const osThreadAttr_t DXL_Task_attributes = {
+  .name = "DXL_Task",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for MRS_Task */
+osThreadId_t MRS_TaskHandle;
+const osThreadAttr_t MRS_Task_attributes = {
+  .name = "MRS_Task",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for zerPosi */
+osMessageQueueId_t zerPosiHandle;
+const osMessageQueueAttr_t zerPosi_attributes = {
+  .name = "zerPosi"
+};
+/* Definitions for dxlPosi */
+osMessageQueueId_t dxlPosiHandle;
+const osMessageQueueAttr_t dxlPosi_attributes = {
+  .name = "dxlPosi"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
 
 /* USER CODE END FunctionPrototypes */
 
-void StartDefaultTask(void const * argument);
-extern void main_DXL(void const * argument);
-extern void main_MRS(void const * argument);
+void StartDefaultTask(void *argument);
+extern void main_DXL(void *argument);
+extern void main_MRS(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
-
-/* GetIdleTaskMemory prototype (linked to static allocation support) */
-void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize );
-
-/* USER CODE BEGIN GET_IDLE_TASK_MEMORY */
-static StaticTask_t xIdleTaskTCBBuffer;
-static StackType_t xIdleStack[configMINIMAL_STACK_SIZE];
-
-void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
-{
-  *ppxIdleTaskTCBBuffer = &xIdleTaskTCBBuffer;
-  *ppxIdleTaskStackBuffer = &xIdleStack[0];
-  *pulIdleTaskStackSize = configMINIMAL_STACK_SIZE;
-  /* place for user code */
-}
-/* USER CODE END GET_IDLE_TASK_MEMORY */
 
 /**
   * @brief  FreeRTOS initialization
@@ -100,26 +112,34 @@ void MX_FREERTOS_Init(void) {
   /* start timers, add new ones, ... */
   /* USER CODE END RTOS_TIMERS */
 
+  /* Create the queue(s) */
+  /* creation of zerPosi */
+  zerPosiHandle = osMessageQueueNew (16, sizeof(MotionPacket_TypeDef), &zerPosi_attributes);
+
+  /* creation of dxlPosi */
+  dxlPosiHandle = osMessageQueueNew (16, sizeof(MotionPacket_TypeDef), &dxlPosi_attributes);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
+  /* creation of defaultTask */
+  defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* definition and creation of DXL_Task */
-  osThreadDef(DXL_Task, main_DXL, osPriorityIdle, 0, 1024);
-  DXL_TaskHandle = osThreadCreate(osThread(DXL_Task), NULL);
+  /* creation of DXL_Task */
+  DXL_TaskHandle = osThreadNew(main_DXL, NULL, &DXL_Task_attributes);
 
-  /* definition and creation of MRS_Task */
-  osThreadDef(MRS_Task, main_MRS, osPriorityIdle, 0, 1024);
-  MRS_TaskHandle = osThreadCreate(osThread(MRS_Task), NULL);
+  /* creation of MRS_Task */
+  MRS_TaskHandle = osThreadNew(main_MRS, NULL, &MRS_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* USER CODE BEGIN RTOS_EVENTS */
+  /* add events, ... */
+  /* USER CODE END RTOS_EVENTS */
 
 }
 
@@ -130,7 +150,7 @@ void MX_FREERTOS_Init(void) {
   * @retval None
   */
 /* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
+void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
@@ -145,3 +165,4 @@ void StartDefaultTask(void const * argument)
 /* USER CODE BEGIN Application */
 
 /* USER CODE END Application */
+

@@ -26,6 +26,8 @@
 #include "app_pid_motion_cmd.h"
 
 /* Private variables ---------------------------------------------------------*/
+extern osMessageQId zerPosiHandle;
+extern osMessageQId dxlPosiHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 void CAN_FilterConfig(CAN_HandleTypeDef *hcan);
@@ -47,12 +49,6 @@ void main_MRS(void *argument){
 
 	CAN_FilterConfig(&hcan1);
 
-	MRS_DXL_id = idRead(
-			DXL_ID_01_GPIO_Port, DXL_ID_01_Pin,
-			DXL_ID_02_GPIO_Port, DXL_ID_02_Pin,
-			DXL_ID_04_GPIO_Port, DXL_ID_04_Pin,
-			DXL_ID_08_GPIO_Port, DXL_ID_08_Pin,
-			GPIO_PIN_RESET);
 	MRS_ZER_id = idRead(
 			ZER_ID_01_GPIO_Port, ZER_ID_01_Pin,
 			ZER_ID_02_GPIO_Port, ZER_ID_02_Pin,
@@ -60,9 +56,14 @@ void main_MRS(void *argument){
 			ZER_ID_08_GPIO_Port, ZER_ID_08_Pin,
 			GPIO_PIN_RESET);
 
-	//myCanid = idRead();
+	MRS_DXL_id = idRead(
+			DXL_ID_01_GPIO_Port, DXL_ID_01_Pin,
+			DXL_ID_02_GPIO_Port, DXL_ID_02_Pin,
+			DXL_ID_04_GPIO_Port, DXL_ID_04_Pin,
+			DXL_ID_08_GPIO_Port, DXL_ID_08_Pin,
+			GPIO_PIN_RESET);
 
-	//set_my_can_id(myCanid);
+	set_my_can_id(MRS_ZER_id);
 	add_my_can_sub_id(1, 28);
 
 	while(1){
@@ -73,6 +74,23 @@ void main_MRS(void *argument){
 	}
 }
 
+void app_rx_motion_sub_pid_adc_ctl(uint8_t num, prtc_header_t *pPh, prtc_data_ctl_motion_adc_t *pData)
+{
+	uint8_t axleId = (uint8_t)pPh->target_sub_id;
+	axleId -= 1;
+	if (32 < axleId) return;
+
+	MotionPacket_TypeDef motionMsg;
+
+	motionMsg.gid = pPh->target_id;
+	motionMsg.sid = pPh->target_sub_id;
+	motionMsg.posi = pData->adc_val;
+
+	if(motionMsg.gid == MRS_ZER_id)
+		osMessageQueuePut(zerPosiHandle, &motionMsg, 0U, 0U);
+	else if(motionMsg.gid == MRS_DXL_id)
+		osMessageQueuePut(dxlPosiHandle, &motionMsg, 0U, 0U);
+}
 
 
 void CAN_FilterConfig(CAN_HandleTypeDef *hcan)
