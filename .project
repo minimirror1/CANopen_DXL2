@@ -36,5 +36,20 @@
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_DXL_SDK</locationURI>
 		</link>
+		<link>
+			<name>Component/cpp_serial</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_serial</locationURI>
+		</link>
+		<link>
+			<name>Component/cpp_tick</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_tick</locationURI>
+		</link>
+		<link>
+			<name>Task_DXL/cpp_DXL_Class</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_DXL_Class</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>

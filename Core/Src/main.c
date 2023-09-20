@@ -58,7 +58,14 @@ void MX_FREERTOS_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+#ifdef __cplusplus
+extern "C" int _write(int32_t file, uint8_t *ptr, int32_t len) {
+#else
+int _write(int32_t file, uint8_t *ptr, int32_t len) {
+#endif
+    for(int32_t i = 0; i < len; ++i) { ITM_SendChar(*ptr++); }
+    return len;
+}
 /* USER CODE END 0 */
 
 /**
