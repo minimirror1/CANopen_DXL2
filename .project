@@ -32,6 +32,21 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>Component/CANopenNode</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_CANopen/CANopenNode</locationURI>
+		</link>
+		<link>
+			<name>Component/CANopenNode_Com</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_CANopen/CANopenNode_Com</locationURI>
+		</link>
+		<link>
+			<name>Component/CANopenNode_STM32</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_CANopen/CANopenNode_STM32</locationURI>
+		</link>
+		<link>
 			<name>Component/cpp_DXL_SDK</name>
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_DXL_SDK</locationURI>

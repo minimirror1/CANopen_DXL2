@@ -24,6 +24,14 @@
 #include "cpp_serial.h"
 #include "cpp_tick.h"
 
+/* CANopen SDK ---------------------------------------------------------------*/
+#include "../CANopenNode_STM32/CO_app_STM32.h"
+#include "OD.h"
+#include "sdo.h"
+#include "pdo.h"
+
+/* Motor Class ---------------------------------------------------------------*/
+#include "CANopen_Motor.h"
 
 void main_ZeroErr(void *argument){
 
