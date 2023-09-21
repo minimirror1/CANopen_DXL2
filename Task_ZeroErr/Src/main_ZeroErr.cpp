@@ -35,6 +35,8 @@
 #include "CANopen_Motor.h"
 
 /* Private variables ---------------------------------------------------------*/
+extern CO_t* CO;
+
 Motors motors;
 
 /* Private function prototypes -----------------------------------------------*/
@@ -50,7 +52,22 @@ void main_ZeroErr(void *argument){
 	CO_NMT_t *NMTmaster = CO->NMT;
 	NMTmaster->internalCommand = CO_NMT_ENTER_OPERATIONAL;
 
-	//osDelay(10000);//
+	motors.motorsInit(CO, 1, 12);
+
+	motors.add_motor(1, ROT_CW  ,90  ,262144, 262144);
+	motors.add_motor(2, ROT_CCW ,90  ,174763, 174763);
+	motors.add_motor(3, ROT_CW  ,60  ,174763, 174763);
+	motors.add_motor(4, ROT_CW  ,130 ,174763, 174763);
+
+	motors.add_motor(5,  ROT_CCW ,210 ,262144, 262144);
+	motors.add_motor(6,  ROT_CW  ,160 ,262144, 262144);
+	motors.add_motor(7,  ROT_CCW ,60  ,262144, 262144);
+	motors.add_motor(8,  ROT_CCW ,40  ,262144, 262144);
+
+	motors.add_motor(9,  ROT_CW  ,210 ,262144, 262144);
+	motors.add_motor(10, ROT_CCW ,160 ,262144, 262144);
+	motors.add_motor(11, ROT_CW  ,60  ,262144, 262144);
+	motors.add_motor(12, ROT_CW  ,40  ,262144, 262144);
 
 
 
