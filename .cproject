@@ -47,6 +47,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_NET/PHD/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_PRTC/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_MRS/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_ZeroErr/Inc}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input.1689780813" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.assembler.input"/>
 							</tool>
@@ -81,6 +82,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_PRTC/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_MRS/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_ZeroErr/Inc}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.714348412" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -115,6 +117,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Component/gm_motion_CANprotocol/common/GM_PRTC/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_MRS/Inc}&quot;"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/CANopen_DXL2/Task_ZeroErr/Inc}&quot;"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp.1651305292" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.cpp.compiler.input.cpp"/>
 							</tool>
@@ -137,6 +140,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Task_ZeroErr"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Task_MRS"/>
@@ -240,6 +244,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Task_ZeroErr"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Component"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Task_MRS"/>

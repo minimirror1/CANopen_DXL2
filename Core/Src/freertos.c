@@ -25,7 +25,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "main_DXL.h"
 #include "main_MRS.h"
+#include "main_ZeroErr.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,6 +70,13 @@ const osThreadAttr_t MRS_Task_attributes = {
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for zeroErrTask */
+osThreadId_t zeroErrTaskHandle;
+const osThreadAttr_t zeroErrTask_attributes = {
+  .name = "zeroErrTask",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
+};
 /* Definitions for zerPosi */
 osMessageQueueId_t zerPosiHandle;
 const osMessageQueueAttr_t zerPosi_attributes = {
@@ -87,6 +96,7 @@ const osMessageQueueAttr_t dxlPosi_attributes = {
 void StartDefaultTask(void *argument);
 extern void main_DXL(void *argument);
 extern void main_MRS(void *argument);
+extern void main_ZeroErr(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -132,6 +142,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of MRS_Task */
   MRS_TaskHandle = osThreadNew(main_MRS, NULL, &MRS_Task_attributes);
+
+  /* creation of zeroErrTask */
+  zeroErrTaskHandle = osThreadNew(main_ZeroErr, NULL, &zeroErrTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
