@@ -18,6 +18,7 @@
 
 /* User Task -----------------------------------------------------------------*/
 #include "main_DXL.h"
+#include "main_MRS.h"
 
 /* Component -----------------------------------------------------------------*/
 #include "cpp_serial.h"
@@ -35,12 +36,16 @@ extern UART_HandleTypeDef huart2;	//DXL 2 = NACK
 Serial serial1;	//huart1
 Serial serial2;	//huart2
 
+extern osMessageQId dxlPosiHandle;
+
 /* Private function prototypes -----------------------------------------------*/
 void Serial_1_Init(void);
 void Serial_2_Init(void);
 
 
 void main_DXL(void *argument){
+
+	MotionPacket_TypeDef motionMsg;
 
 	Serial_1_Init();
 	Serial_2_Init();
@@ -66,6 +71,15 @@ void main_DXL(void *argument){
 
 	/* Infinite loop */
 	for (;;) {
+
+		osStatus_t status;
+		do{
+			status = osMessageQueueGet(dxlPosiHandle, &motionMsg, NULL, 0U); // wait for message
+			if (status == osOK) {
+				dxl_1.setPosition(motionMsg.sid, motionMsg.posi);
+				dxl_2.setPosition(motionMsg.sid, motionMsg.posi);
+			}
+		}while(status == osOK);
 
 		osDelay(20);
 		serial1.rxLed_Check();
