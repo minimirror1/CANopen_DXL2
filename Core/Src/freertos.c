@@ -61,14 +61,14 @@ osThreadId_t DXL_TaskHandle;
 const osThreadAttr_t DXL_Task_attributes = {
   .name = "DXL_Task",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityHigh7,
 };
 /* Definitions for MRS_Task */
 osThreadId_t MRS_TaskHandle;
 const osThreadAttr_t MRS_Task_attributes = {
   .name = "MRS_Task",
   .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityHigh6,
 };
 /* Definitions for zeroErrTask */
 osThreadId_t zeroErrTaskHandle;

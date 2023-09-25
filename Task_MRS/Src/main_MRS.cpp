@@ -42,6 +42,7 @@ uint8_t MRS_ZER_id = 0;
 
 void main_MRS(void *argument){
 
+	Tick runLED;
 	/* MRS protocol */
 	can_init_data_save(&hcan1);
 	gm_motion_TX_LED_init(LD_MRS_TX_GPIO_Port, LD_MRS_TX_Pin, GPIO_PIN_RESET);
@@ -71,6 +72,10 @@ void main_MRS(void *argument){
 		/* MRS Protocol */
 		proc_can_rx();
 		proc_can_tx();
+
+		if(runLED.delay(500)){
+			HAL_GPIO_TogglePin(LD_RUN_GPIO_Port, LD_RUN_Pin);
+		}
 	}
 }
 
