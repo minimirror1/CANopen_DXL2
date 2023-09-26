@@ -45,13 +45,16 @@ void Serial_2_Init(void);
 
 void main_DXL(void *argument){
 
+	Tick t_dxl1_run_led;
+	Tick t_dxl2_run_led;
+
 	MotionPacket_TypeDef motionMsg;
 
 	Serial_1_Init();
 	Serial_2_Init();
 
-	motorDXL dxl_1(&serial1, PROTOCOL_VERSION2, 1, 10);
-	motorDXL dxl_2(&serial2, PROTOCOL_VERSION2, 1, 10);
+	motorDXL dxl_1(&serial2, PROTOCOL_VERSION2, 1, 10);
+	motorDXL dxl_2(&serial1, PROTOCOL_VERSION2, 1, 10);
 
 	dxl_1.add_motor(1, DXL_ROT_CCW, 180, 3071, 2048);
 	dxl_1.add_motor(2, DXL_ROT_CW, 90, 1535, 2048);
@@ -84,6 +87,11 @@ void main_DXL(void *argument){
 		osDelay(20);
 		serial1.rxLed_Check();
 		serial2.rxLed_Check();
+
+		if(t_dxl1_run_led.delay(500))
+			HAL_GPIO_TogglePin(LD_DXL1_ERR_GPIO_Port, LD_DXL1_ERR_Pin);
+		if(t_dxl2_run_led.delay(500))
+			HAL_GPIO_TogglePin(LD_DXL2_ERR_GPIO_Port, LD_DXL2_ERR_Pin);
 	}
 }
 
