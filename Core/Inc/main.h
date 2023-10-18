@@ -117,6 +117,8 @@ void HAL_CAN_RxFifo0MsgPendingCallback1(CAN_HandleTypeDef *hcan);
 #include "dl_can.h"
 #include "net_phd_pid.h"
 
+//#define CANOPEN_PP_MODE
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

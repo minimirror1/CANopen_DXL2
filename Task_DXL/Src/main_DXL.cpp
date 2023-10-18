@@ -56,6 +56,7 @@ void main_DXL(void *argument){
 	motorDXL dxl_1(&serial2, PROTOCOL_VERSION2, 1, 10);
 	motorDXL dxl_2(&serial1, PROTOCOL_VERSION2, 1, 10);
 
+#if 0//중간
 	dxl_1.add_motor(1, DXL_ROT_CCW, 180, 3071, 2048);
 	dxl_1.add_motor(2, DXL_ROT_CW, 90, 1535, 2048);
 	dxl_1.add_motor(3, DXL_ROT_CW, 90, 1535, 2048);
@@ -67,7 +68,20 @@ void main_DXL(void *argument){
 	dxl_2.add_motor(8, DXL_ROT_CW, 280, 455, 2048);
 	dxl_2.add_motor(9, DXL_ROT_CW, 120, 2047, 2048);
 	dxl_2.add_motor(10, DXL_ROT_CW, 272, 500, 2048);
+#endif
+#if 1//남자
+	dxl_1.add_motor(1, DXL_ROT_CCW, 180, 3071, 2048);
+	dxl_1.add_motor(2, DXL_ROT_CW, 90, 1535, 2048);
+	dxl_1.add_motor(3, DXL_ROT_CW, 90, 1535, 2048);
+	dxl_1.add_motor(4, DXL_ROT_CCW, 90, 2559, 2048);
 
+	dxl_2.add_motor(5, DXL_ROT_CCW, 280, 3640, 2158);//
+	dxl_2.add_motor(6, DXL_ROT_CCW, 120, 2047, 0);//
+	dxl_2.add_motor(7, DXL_ROT_CCW, 272, 3594, 2048);
+	dxl_2.add_motor(8, DXL_ROT_CW, 280, 455, 2054);//
+	dxl_2.add_motor(9, DXL_ROT_CW, 120, 2047, 0);
+	dxl_2.add_motor(10, DXL_ROT_CW, 272, 500, 2048);
+#endif
 
 	dxl_1.init();
 	dxl_2.init();
