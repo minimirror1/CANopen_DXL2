@@ -66,8 +66,8 @@ void main_ZeroErr(void *argument){
 	CO_NMT_t *NMTmaster = CO->NMT;
 	NMTmaster->internalCommand = CO_NMT_ENTER_OPERATIONAL;
 
-	motors.motorsInit(CO, 1, 12);
-	//motors.motorsInit(CO, 6, 6);
+//	motors.motorsInit(CO, 1, 12);
+	motors.motorsInit(CO, 10, 10);
 	motors.init_status_led(LD_ZER_ERR_GPIO_Port, LD_ZER_ERR_Pin, GPIO_PIN_RESET);
 
 #if 0
@@ -87,24 +87,56 @@ void main_ZeroErr(void *argument){
 	motors.add_motor(12, ROT_CW  ,40  ,262144, 262144);
 #endif
 #if 1
-	motors.add_motor(1 , ROT_CW  ,90  ,262144, 262144, 2048);
-	motors.add_motor(2 , ROT_CCW ,90  ,174763, 174763, 1020);
-	motors.add_motor(3 , ROT_CW  ,60  ,174763, 174763, 2048);
-	motors.add_motor(4 , ROT_CW  ,130 ,174763, 174763, 936);
-//
-	motors.add_motor(5 , ROT_CCW ,210 ,262144, 262144, 624);
-	motors.add_motor(6 , ROT_CW  ,160 ,262144, 262144, 12);
-	motors.add_motor(7 , ROT_CCW ,60  ,262144, 262144, 2041);
-	motors.add_motor(8 , ROT_CCW ,40  ,262144, 262144, 2048);
-//
-	motors.add_motor(9 , ROT_CW  ,210 ,262144, 262144, 626);
+#ifdef CANOPEN_MODE
+	//조종기 초기위치
+	motors.add_motor(10, ROT_CCW ,160 ,10000, 5566, 4095);
+
+#else
+	//조종기 초기위치
+//	motors.add_motor(1 , ROT_CW  ,90  ,262144, 262144, 2048);
+//	motors.add_motor(2 , ROT_CCW ,90  ,174763, 174763, 1020);
+//	motors.add_motor(3 , ROT_CW  ,60  ,174763, 174763, 2048);
+//	motors.add_motor(4 , ROT_CW  ,130 ,174763, 174763, 936);
+////
+//	motors.add_motor(5 , ROT_CCW ,210 ,262144, 262144, 624);
+//	motors.add_motor(6 , ROT_CW  ,160 ,262144, 262144, 12);
+//	motors.add_motor(7 , ROT_CCW ,60  ,262144, 262144, 2041);
+//	motors.add_motor(8 , ROT_CCW ,40  ,262144, 262144, 2048);
+////
+//	motors.add_motor(9 , ROT_CW  ,210 ,262144, 262144, 626);
 	motors.add_motor(10, ROT_CCW ,160 ,262144, 262144, 48);
-	motors.add_motor(11, ROT_CW  ,60  ,262144, 262144, 2170);
-	motors.add_motor(12, ROT_CW  ,40  ,262144, 262144, 2048);
+//	motors.add_motor(11, ROT_CW  ,60  ,262144, 262144, 2170);
+//	motors.add_motor(12, ROT_CW  ,40  ,262144, 262144, 2048);
+#endif
 #endif
     motors.init();
 
+   //osDelay(1000);
+    //motors.setPosition(10,4094);
+
 	while(1){
+
+#ifdef CANOPEN_MODE
+
+		osStatus_t status = osMessageQueueGet(zerPosiHandle, &motionMsg, NULL, 0U); // wait for message
+		if (status == osOK) {
+			motors.setPosition(motionMsg.sid, motionMsg.posi);
+		}
+
+		motors.movePosition();
+		send_RPDO_BuffSend(CO);
+		osDelay(1);
+		send_sync(CO);
+		osDelay(9);
+
+
+
+
+//		osDelay(5);
+//		motors.setAllControlbit();
+//		osDelay(5);
+//		send_sync(CO);
+#else
 		osStatus_t status = osMessageQueueGet(zerPosiHandle, &motionMsg, NULL, 0U); // wait for message
 		if (status == osOK) {
 			motors.setPosition(motionMsg.sid, motionMsg.posi);
@@ -113,13 +145,6 @@ void main_ZeroErr(void *argument){
 
 		send_RPDO_1_BuffSend(CO);
 
-#ifdef CANOPEN_PP_MODE
-		osDelay(10);
-//		osDelay(5);
-//		motors.setAllControlbit();
-//		osDelay(5);
-//		send_sync(CO);
-#else
 		send_sync(CO);
 		osDelay(10);
 #endif

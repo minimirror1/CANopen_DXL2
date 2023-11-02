@@ -117,7 +117,12 @@ void HAL_CAN_RxFifo0MsgPendingCallback1(CAN_HandleTypeDef *hcan);
 #include "dl_can.h"
 #include "net_phd_pid.h"
 
-//#define CANOPEN_PP_MODE
+
+// 1 : PDO CSP, 2 : PDO PP, 3 : SDO PP
+#define PDO_CSP			1
+#define PDO_PP			2
+#define SDO_PP			3
+#define CANOPEN_MODE	PDO_PP
 
 /* USER CODE END Private defines */
 
