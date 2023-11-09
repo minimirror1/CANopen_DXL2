@@ -24,6 +24,7 @@
 
 /* MRS -----------------------------------------------------------------------*/
 #include "app_pid_motion_cmd.h"
+#include "app_pid_init_cmd.h"
 
 /* Private variables ---------------------------------------------------------*/
 extern osMessageQId zerPosiHandle;
@@ -67,6 +68,15 @@ void main_MRS(void *argument){
 	set_my_can_id(MRS_ZER_id);
 	add_my_can_sub_id(1, 28);
 
+	/* MRS Boot msg */
+	app_tx_init_sub_pid_boot_ctl(
+			0,
+			0,
+			MRS_ZER_id,
+			MASTER_CAN_ID,
+			1,
+			0);
+
 	while(1){
 		osDelay(1);
 		/* MRS Protocol */
@@ -95,6 +105,146 @@ void app_rx_motion_sub_pid_adc_ctl(uint8_t num, prtc_header_t *pPh, prtc_data_ct
 		osMessageQueuePut(zerPosiHandle, &motionMsg, 0U, 0U);
 	else if(motionMsg.gid == MRS_DXL_id)
 		osMessageQueuePut(dxlPosiHandle, &motionMsg, 0U, 0U);
+}
+
+/* init sequnce */
+void app_rx_init_sub_pid_driver_data1_ctl(uint8_t num, prtc_header_t *pPh, prtc_data_ctl_init_driver_data1_t *pData)
+{
+	if(pPh->target_id != MRS_ZER_id && pPh->target_id != MRS_DXL_id)
+		return;
+	prtc_data_ctl_init_driver_data1_t *temp = (prtc_data_ctl_init_driver_data1_t *)pData;
+
+	uint8_t SensorDirection = (uint8_t)temp->direction;
+	uint16_t OppositeLimit = (uint16_t)temp->angle;
+	uint16_t DefaultLocation = (uint16_t)temp->init_position;
+	uint8_t ReductionRatio = (uint8_t)temp->reducer_ratio;
+
+
+
+	app_tx_init_sub_pid_driver_data1_rsp(
+		num,
+		0,
+		pPh->target_id,
+		MASTER_CAN_ID,
+		pPh->target_sub_id,
+		0,
+		SensorDirection,
+		OppositeLimit,
+		DefaultLocation,
+		ReductionRatio);
+}
+void app_rx_init_sub_pid_driver_data2_ctl(uint8_t num, prtc_header_t *pPh, prtc_data_ctl_init_driver_data2_t *pData)
+{
+	if(pPh->target_id != MRS_ZER_id && pPh->target_id != MRS_DXL_id)
+		return;
+	prtc_data_ctl_init_driver_data2_t *temp = (prtc_data_ctl_init_driver_data2_t *)pData;
+	uint32_t target_speed = temp->count;
+	uint32_t target_acc = temp->rpm * 100;
+
+	app_tx_init_sub_pid_driver_data2_rsp(
+		num,
+		0,
+		pPh->target_id,
+		MASTER_CAN_ID,
+		pPh->target_sub_id,
+		0,
+		temp->count,
+		temp->rpm);
+
+}
+
+
+void app_rx_init_sub_pid_move_sensor_ctl(uint8_t num, prtc_header_t *pPh, uint8_t *pData)
+{
+	if(pPh->target_id != MRS_ZER_id && pPh->target_id != MRS_DXL_id)
+		return;
+
+	app_tx_init_sub_pid_move_sensor_rsp(
+		num,
+		0,
+		pPh->target_id,
+		MASTER_CAN_ID,
+		pPh->target_sub_id,
+		0,
+		0);
+}
+
+void app_rx_init_sub_pid_status_rqt(uint8_t num, prtc_header_t *pPh, prtc_data_rqt_init_status_t *pData)
+{
+	uint8_t status = 0;
+
+	if(pPh->target_id != MRS_ZER_id && pPh->target_id != MRS_DXL_id)
+		return;
+
+	prtc_data_rqt_init_status_t *temp = (prtc_data_rqt_init_status_t *) pData;
+
+	switch(temp->step)
+	{
+	//init step 1 : 1. vattery check
+	case ABSOLUTE_BATTERY:
+		app_tx_init_sub_pid_status_rsp(
+			num,
+			0,
+			pPh->target_id,
+			MASTER_CAN_ID,
+			pPh->target_sub_id,
+			0,
+			ABSOLUTE_BATTERY,
+			1); // ok;
+		break;
+	case DRIVER_DATA1:
+
+		break;
+	case DRIVER_DATA2:
+
+		break;
+	case MOVE_SENSOR:
+
+		status = 1;//ok
+		app_tx_init_sub_pid_status_rsp(
+			num,
+			0,
+			pPh->target_id,
+			MASTER_CAN_ID,
+			pPh->target_sub_id,
+			0,
+			MOVE_SENSOR,
+			status);
+
+		break;
+	case MOVE_INIT_POSITION:
+
+		//todo : 초기위치로 이동 완료하였는지 체크할 것
+		status = 1;//ok
+
+		//idtest
+		app_tx_init_sub_pid_status_rsp(
+			num,
+			0,
+			pPh->target_id,
+			MASTER_CAN_ID,
+			pPh->target_sub_id,
+			0,
+			MOVE_INIT_POSITION,
+			status);
+
+		break;
+	}
+}
+void app_rx_init_sub_pid_move_init_position_ctl(uint8_t num, prtc_header_t *pPh, uint8_t *pData)
+{
+	if(pPh->target_id != MRS_ZER_id && pPh->target_id != MRS_DXL_id)
+		return;
+
+	//MAL_Motor_AcPanasonic_SetDefaultLocation(mmotor[0].ctrHandle);
+
+ 	app_tx_init_sub_pid_move_init_position_rsp(
+		num,
+		0,
+		pPh->target_id,
+		MASTER_CAN_ID,
+		pPh->target_sub_id,
+		0);
 }
 
 
