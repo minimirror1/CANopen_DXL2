@@ -87,6 +87,16 @@ osMessageQueueId_t dxlPosiHandle;
 const osMessageQueueAttr_t dxlPosi_attributes = {
   .name = "dxlPosi"
 };
+/* Definitions for zerCmd_rx */
+osMessageQueueId_t zerCmd_rxHandle;
+const osMessageQueueAttr_t zerCmd_rx_attributes = {
+  .name = "zerCmd_rx"
+};
+/* Definitions for zerCmd_tx */
+osMessageQueueId_t zerCmd_txHandle;
+const osMessageQueueAttr_t zerCmd_tx_attributes = {
+  .name = "zerCmd_tx"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -124,10 +134,16 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the queue(s) */
   /* creation of zerPosi */
-  zerPosiHandle = osMessageQueueNew (16, sizeof(MotionPacket_TypeDef), &zerPosi_attributes);
+  zerPosiHandle = osMessageQueueNew (22, sizeof(MotionPacket_TypeDef), &zerPosi_attributes);
 
   /* creation of dxlPosi */
-  dxlPosiHandle = osMessageQueueNew (16, sizeof(MotionPacket_TypeDef), &dxlPosi_attributes);
+  dxlPosiHandle = osMessageQueueNew (22, sizeof(MotionPacket_TypeDef), &dxlPosi_attributes);
+
+  /* creation of zerCmd_rx */
+  zerCmd_rxHandle = osMessageQueueNew (22, sizeof(BypassPacket_TypeDef), &zerCmd_rx_attributes);
+
+  /* creation of zerCmd_tx */
+  zerCmd_txHandle = osMessageQueueNew (22, sizeof(BypassPacket_TypeDef), &zerCmd_tx_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
