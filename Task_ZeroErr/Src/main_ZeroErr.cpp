@@ -51,7 +51,7 @@ extern osMessageQueueId_t zerCmd_txHandle;
 /* Private function prototypes -----------------------------------------------*/
 void CANopenNode_Init(void);
 void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx);
-
+uint32_t os_rx_cnt = 0;
 void main_ZeroErr(void *argument){
 
 
@@ -125,12 +125,9 @@ void main_ZeroErr(void *argument){
 
 #ifdef CANOPEN_MODE
 
-		osStatus_t status = osMessageQueueGet(zerPosiHandle, &motionMsg, NULL, 0U); // wait for message
-		if (status == osOK) {
-			motors.setPosition(motionMsg.sid, motionMsg.posi);
-		}
 
 
+		osStatus_t status;
 		status = osMessageQueueGet(zerCmd_rxHandle, &cmd_rx, NULL, 0U); // wait for message
 		if (status == osOK) {
 			mrs_zerrx_cmd_process(&cmd_rx);
@@ -156,7 +153,19 @@ void main_ZeroErr(void *argument){
 			else if(def_result == 0)			//실패
 				Zer_All_init_flag = INIT_FAIL;	//init fail
 		}
-		osDelay(9);
+
+		for(int time = 0; time < 9; time++ ){
+		    do {
+		    	status = osMessageQueueGet(zerPosiHandle, &motionMsg, NULL, 0U); // wait for message
+
+		        if (status == osOK) {
+		        	motors.setPosition(motionMsg.sid, motionMsg.posi);
+					os_rx_cnt++;
+				}
+		    } while (status == osOK); // 큐가 비어있지 않는 동안 계속 반복
+			osDelay(1);
+		}
+		//osDelay(9);
 
 
 

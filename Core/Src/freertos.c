@@ -144,22 +144,22 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the queue(s) */
   /* creation of zerPosi */
-  zerPosiHandle = osMessageQueueNew (22, sizeof(MotionPacket_TypeDef), &zerPosi_attributes);
+  zerPosiHandle = osMessageQueueNew (40, sizeof(MotionPacket_TypeDef), &zerPosi_attributes);
 
   /* creation of dxlPosi */
-  dxlPosiHandle = osMessageQueueNew (22, sizeof(MotionPacket_TypeDef), &dxlPosi_attributes);
+  dxlPosiHandle = osMessageQueueNew (40, sizeof(MotionPacket_TypeDef), &dxlPosi_attributes);
 
   /* creation of zerCmd_rx */
-  zerCmd_rxHandle = osMessageQueueNew (22, sizeof(BypassPacket_TypeDef), &zerCmd_rx_attributes);
+  zerCmd_rxHandle = osMessageQueueNew (40, sizeof(BypassPacket_TypeDef), &zerCmd_rx_attributes);
 
   /* creation of zerCmd_tx */
-  zerCmd_txHandle = osMessageQueueNew (22, sizeof(BypassPacket_TypeDef), &zerCmd_tx_attributes);
+  zerCmd_txHandle = osMessageQueueNew (40, sizeof(BypassPacket_TypeDef), &zerCmd_tx_attributes);
 
   /* creation of dxlCmd_rx */
-  dxlCmd_rxHandle = osMessageQueueNew (22, sizeof(BypassPacket_TypeDef), &dxlCmd_rx_attributes);
+  dxlCmd_rxHandle = osMessageQueueNew (40, sizeof(BypassPacket_TypeDef), &dxlCmd_rx_attributes);
 
   /* creation of dxlCmd_tx */
-  dxlCmd_txHandle = osMessageQueueNew (22, sizeof(BypassPacket_TypeDef), &dxlCmd_tx_attributes);
+  dxlCmd_txHandle = osMessageQueueNew (40, sizeof(BypassPacket_TypeDef), &dxlCmd_tx_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */

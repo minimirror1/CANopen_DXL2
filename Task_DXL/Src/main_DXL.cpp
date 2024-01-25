@@ -63,11 +63,13 @@ void main_DXL(void *argument){
 	MotionPacket_TypeDef motionMsg;
 	BypassPacket_TypeDef cmd_rx;
 
+	osDelay(1000);
+
 	Serial_1_Init();
 	Serial_2_Init();
 
-	dxl_1.motorDXL_assign(&serial2, PROTOCOL_VERSION2, 1, 10);
-	dxl_2.motorDXL_assign(&serial1, PROTOCOL_VERSION2, 1, 10);
+	dxl_1.motorDXL_assign(&serial2, PROTOCOL_VERSION2, 1, 4);
+	dxl_2.motorDXL_assign(&serial1, PROTOCOL_VERSION2, 5, 10);
 
 
 #if 0//중간
@@ -111,8 +113,8 @@ void main_DXL(void *argument){
 		}
 
 		if(Dxl_All_init_flag == INIT_INFO_DEFAULT_POSI_START){
-			dxl_1.init();
-			dxl_2.init();
+			dxl_1.DefaultPosi();
+			dxl_2.DefaultPosi();
 			Dxl_All_init_flag = INIT_OK;		//init ok
 		}
 		else if(Dxl_All_init_flag == INIT_OK){
@@ -127,7 +129,7 @@ void main_DXL(void *argument){
 			serial1.rxLed_Check();
 			serial2.rxLed_Check();
 		}
-		osDelay(20);
+		osDelay(1);
 		if(t_dxl1_run_led.delay(500))
 			HAL_GPIO_TogglePin(LD_DXL1_ERR_GPIO_Port, LD_DXL1_ERR_Pin);
 		if(t_dxl2_run_led.delay(500))

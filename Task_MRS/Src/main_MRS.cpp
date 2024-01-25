@@ -124,6 +124,7 @@ void proc_can_rx(void)
 					// 하드코딩 if((pPh->target_id == my_can_id_data.id || pPh->target_id == CAN_ID_BROAD_CAST) && (pPh->target_sub_id == my_can_id_data.sub_id[j] || pPh->target_sub_id == CAN_SUB_ID_BROAD_CAST)){
 						gm_motion_RX_LED_ON(i);//210218 shs//210430kjh
 						net_phd_pid(i, &can_rx_ring_buff[i].can_header[can_rx_ring_buff[i].tail], (uint8_t *)&can_rx_ring_buff[i].data[can_rx_ring_buff[i].tail]);
+						osDelay(1);
 						break;
 					}
 				}
@@ -198,6 +199,7 @@ void mrs_tx_cmd_process(BypassPacket_TypeDef *cmd_tx){
 		}
 }
 
+uint32_t can_rx_cnt = 0;
 void app_rx_motion_sub_pid_adc_ctl(uint8_t num, prtc_header_t *pPh, prtc_data_ctl_motion_adc_t *pData)
 {
 	uint8_t axleId = (uint8_t)pPh->target_sub_id;
@@ -210,10 +212,14 @@ void app_rx_motion_sub_pid_adc_ctl(uint8_t num, prtc_header_t *pPh, prtc_data_ct
 	motionMsg.sid = pPh->target_sub_id;
 	motionMsg.posi = pData->adc_val;
 
-	if(pPh->target_id == MRS_ZER_id)
+	if(pPh->target_id == MRS_ZER_id){
 		osMessageQueuePut(zerPosiHandle, &motionMsg, 0U, 0U);
-	else if(pPh->target_id == MRS_DXL_id)
+		can_rx_cnt++;
+	}
+	else if(pPh->target_id == MRS_DXL_id){
 		osMessageQueuePut(dxlPosiHandle, &motionMsg, 0U, 0U);
+	}
+
 }
 
 /* init sequnce */
