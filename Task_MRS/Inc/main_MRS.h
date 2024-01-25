@@ -16,6 +16,16 @@ extern "C" {
 void main_MRS(void *argument);
 
 
+
+typedef enum{
+	INIT_NONE = 0,
+	INIT_NEW_DATA,					//new data-> info + default posi
+	INIT_INFO_DEFAULT_POSI_START,
+	INIT_OK,						//ok -> default posi
+	INIT_FAIL,
+	INIT_DEFAULT_POSI_START
+}Init_TypeDef;
+
 typedef struct _MotionPacket_TypeDef{
 	uint8_t gid;
 	uint8_t sid;
@@ -26,10 +36,12 @@ typedef struct _MotionPacket_TypeDef{
 typedef enum _BypassCmd_TypeDef{
 	MRS_RX_DATA1 = 1,
 	MRS_RX_DATA2,
+	MRS_RX_DATA_OP,
 	MRS_RX_MOVE_DEFAULT_POSI,
 	MRS_RX_MOVE_DEFAULT_POSI_CHECK,
 	MRS_TX_DATA1_ACK,
 	MRS_TX_DATA2_ACK,
+	MRS_TX_DATA_OP_ACK,
 	MRS_TX_MOVE_DEFAULT_POSI_ACK,
 	MRS_TX_MOVE_DEFAULT_POSI_CHECK
 }BypassCmd_TypeDef;

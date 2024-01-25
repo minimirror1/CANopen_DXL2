@@ -56,13 +56,6 @@ const osThreadAttr_t defaultTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
-/* Definitions for DXL_Task */
-osThreadId_t DXL_TaskHandle;
-const osThreadAttr_t DXL_Task_attributes = {
-  .name = "DXL_Task",
-  .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityHigh7,
-};
 /* Definitions for MRS_Task */
 osThreadId_t MRS_TaskHandle;
 const osThreadAttr_t MRS_Task_attributes = {
@@ -76,6 +69,13 @@ const osThreadAttr_t zeroErrTask_attributes = {
   .name = "zeroErrTask",
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
+};
+/* Definitions for DXL_Task */
+osThreadId_t DXL_TaskHandle;
+const osThreadAttr_t DXL_Task_attributes = {
+  .name = "DXL_Task",
+  .stack_size = 1024 * 4,
+  .priority = (osPriority_t) osPriorityHigh7,
 };
 /* Definitions for zerPosi */
 osMessageQueueId_t zerPosiHandle;
@@ -97,6 +97,16 @@ osMessageQueueId_t zerCmd_txHandle;
 const osMessageQueueAttr_t zerCmd_tx_attributes = {
   .name = "zerCmd_tx"
 };
+/* Definitions for dxlCmd_rx */
+osMessageQueueId_t dxlCmd_rxHandle;
+const osMessageQueueAttr_t dxlCmd_rx_attributes = {
+  .name = "dxlCmd_rx"
+};
+/* Definitions for dxlCmd_tx */
+osMessageQueueId_t dxlCmd_txHandle;
+const osMessageQueueAttr_t dxlCmd_tx_attributes = {
+  .name = "dxlCmd_tx"
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -104,9 +114,9 @@ const osMessageQueueAttr_t zerCmd_tx_attributes = {
 /* USER CODE END FunctionPrototypes */
 
 void StartDefaultTask(void *argument);
-extern void main_DXL(void *argument);
 extern void main_MRS(void *argument);
 extern void main_ZeroErr(void *argument);
+extern void main_DXL(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -145,6 +155,12 @@ void MX_FREERTOS_Init(void) {
   /* creation of zerCmd_tx */
   zerCmd_txHandle = osMessageQueueNew (22, sizeof(BypassPacket_TypeDef), &zerCmd_tx_attributes);
 
+  /* creation of dxlCmd_rx */
+  dxlCmd_rxHandle = osMessageQueueNew (22, sizeof(BypassPacket_TypeDef), &dxlCmd_rx_attributes);
+
+  /* creation of dxlCmd_tx */
+  dxlCmd_txHandle = osMessageQueueNew (22, sizeof(BypassPacket_TypeDef), &dxlCmd_tx_attributes);
+
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
@@ -153,14 +169,14 @@ void MX_FREERTOS_Init(void) {
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
-  /* creation of DXL_Task */
-  DXL_TaskHandle = osThreadNew(main_DXL, NULL, &DXL_Task_attributes);
-
   /* creation of MRS_Task */
   MRS_TaskHandle = osThreadNew(main_MRS, NULL, &MRS_Task_attributes);
 
   /* creation of zeroErrTask */
   zeroErrTaskHandle = osThreadNew(main_ZeroErr, NULL, &zeroErrTask_attributes);
+
+  /* creation of DXL_Task */
+  DXL_TaskHandle = osThreadNew(main_DXL, NULL, &DXL_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

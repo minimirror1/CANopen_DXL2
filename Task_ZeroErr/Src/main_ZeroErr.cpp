@@ -39,7 +39,8 @@
 extern CO_t* CO;
 Motors motors;
 
-uint8_t All_init_flag = 0;//0:none, 1:start init, 2:init ok, 3:init fail
+
+Init_TypeDef Zer_All_init_flag = INIT_NONE;//0:none, 1:start init, 2:init ok, 3:init fail
 
 ZerSetting_TypeDef zerSetting[20] = {0,};
 
@@ -49,12 +50,12 @@ extern osMessageQueueId_t zerCmd_txHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 void CANopenNode_Init(void);
-void mrs_rx_cmd_process(BypassPacket_TypeDef *cmd_rx);
+void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx);
 
 void main_ZeroErr(void *argument){
 
 
-	osDelay(10000);
+	//osDelay(10000);
 	MotionPacket_TypeDef motionMsg;
 	BypassPacket_TypeDef cmd_rx;
 
@@ -73,8 +74,7 @@ void main_ZeroErr(void *argument){
 	CO_NMT_t *NMTmaster = CO->NMT;
 	NMTmaster->internalCommand = CO_NMT_ENTER_OPERATIONAL;
 
-//	motors.motorsInit(CO, 1, 12);
-	motors.motorsInit(CO, 10, 10);
+	motors.motorsInit(CO, 1, 12);
 	motors.init_status_led(LD_ZER_ERR_GPIO_Port, LD_ZER_ERR_Pin, GPIO_PIN_RESET);
 
 #if 0
@@ -133,21 +133,28 @@ void main_ZeroErr(void *argument){
 
 		status = osMessageQueueGet(zerCmd_rxHandle, &cmd_rx, NULL, 0U); // wait for message
 		if (status == osOK) {
-			mrs_rx_cmd_process(&cmd_rx);
+			mrs_zerrx_cmd_process(&cmd_rx);
 		}
 
-		if(All_init_flag == 1){
+		if(Zer_All_init_flag == INIT_INFO_DEFAULT_POSI_START){
 			uint8_t init_result = motors.init();
-			if(init_result == 1)		//성공
-				All_init_flag = 2;		//init ok
-			else if(init_result == 0)	//실패
-				All_init_flag = 3;		//init fail
+			if(init_result == 1)				//성공
+				Zer_All_init_flag = INIT_OK;	//init ok
+			else if(init_result == 0)			//실패
+				Zer_All_init_flag = INIT_FAIL;	//init fail
 		}
-		else if(All_init_flag == 2){
+		else if(Zer_All_init_flag == INIT_OK){
 			motors.movePosition();
 			send_RPDO_BuffSend(CO);
 			osDelay(1);
 			send_sync(CO);
+		}
+		else if(Zer_All_init_flag == INIT_DEFAULT_POSI_START){
+			uint8_t def_result = motors.default_posi();
+			if(def_result == 1)				//성공
+				Zer_All_init_flag = INIT_OK;	//init ok
+			else if(def_result == 0)			//실패
+				Zer_All_init_flag = INIT_FAIL;	//init fail
 		}
 		osDelay(9);
 
@@ -175,7 +182,7 @@ void main_ZeroErr(void *argument){
 	}
 }
 
-void mrs_rx_cmd_process(BypassPacket_TypeDef *cmd_rx) {
+void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx) {
 
 	if (cmd_rx->sid > 12)
 		return;
@@ -194,49 +201,81 @@ void mrs_rx_cmd_process(BypassPacket_TypeDef *cmd_rx) {
 		msg.gid = cmd_rx->gid;
 		msg.sid = cmd_rx->sid;
 		msg.cmd = MRS_TX_DATA1_ACK;
-		memcpy(msg.data, (uint8_t *)pData, 7);
+		memcpy(msg.data, (uint8_t *)pData, 8);
 		osMessageQueuePut(zerCmd_txHandle, &msg, 0U, 0U);
 
 		break;
 	}
 
-	case MRS_RX_DATA2: {
-		if (zerSetting[cmd_rx->sid].f_data1 != true)
-			return;
-		zerSetting[cmd_rx->sid].f_data1 = false; //f_data1 가 먼저 수신된 후 data2가 수신되었을때만 유효하다.
+//	case MRS_RX_DATA2: {
+//		if (zerSetting[cmd_rx->sid].f_data1 != true)
+//			return;
+//
+//		prtc_data_ctl_init_driver_data2_t *pData = (prtc_data_ctl_init_driver_data2_t*) cmd_rx->data;
+//		zerSetting[cmd_rx->sid].tar_speed = pData->count;
+//		zerSetting[cmd_rx->sid].tar_acc = pData->rpm * 100;
+//
+//		motors.add_motor(
+//				cmd_rx->sid,
+//				zerSetting[cmd_rx->sid].rot_dir ,
+//				zerSetting[cmd_rx->sid].angle ,
+//				zerSetting[cmd_rx->sid].tar_speed,
+//				zerSetting[cmd_rx->sid].tar_acc,
+//				zerSetting[cmd_rx->sid].defult_posi);
+//
+//		BypassPacket_TypeDef msg;
+//		msg.gid = cmd_rx->gid;
+//		msg.sid = cmd_rx->sid;
+//		msg.cmd = MRS_TX_DATA2_ACK;
+//		memcpy(msg.data, (uint8_t *)pData, 8);
+//		osMessageQueuePut(zerCmd_txHandle, &msg, 0U, 0U);
+//
+//		break;
+//	}
 
-		prtc_data_ctl_init_driver_data2_t *pData = (prtc_data_ctl_init_driver_data2_t*) cmd_rx->data;
-		zerSetting[cmd_rx->sid].tar_speed = pData->count;
-		zerSetting[cmd_rx->sid].tar_acc = pData->rpm * 100;
+	case MRS_RX_DATA_OP: {
+			if (zerSetting[cmd_rx->sid].f_data1 != true)
+				return;
+			prtc_data_ctl_init_driver_data_op_zero_err_t *pData = (prtc_data_ctl_init_driver_data_op_zero_err_t*) cmd_rx->data;
+			zerSetting[cmd_rx->sid].tar_speed = pData->profile_target_speed;
+			zerSetting[cmd_rx->sid].tar_acc = pData->profile_acc_cnt;
 
-		motors.add_motor(
-				cmd_rx->sid,
-				zerSetting[cmd_rx->sid].rot_dir ,
-				zerSetting[cmd_rx->sid].angle ,
-				zerSetting[cmd_rx->sid].tar_speed,
-				zerSetting[cmd_rx->sid].tar_acc,
-				zerSetting[cmd_rx->sid].defult_posi);
+			motors.add_motor(
+					cmd_rx->sid,
+					zerSetting[cmd_rx->sid].rot_dir ,
+					zerSetting[cmd_rx->sid].angle ,
+					zerSetting[cmd_rx->sid].tar_speed,
+					zerSetting[cmd_rx->sid].tar_acc,
+					zerSetting[cmd_rx->sid].defult_posi);
 
-		BypassPacket_TypeDef msg;
-		msg.gid = cmd_rx->gid;
-		msg.sid = cmd_rx->sid;
-		msg.cmd = MRS_TX_DATA2_ACK;
-		memcpy(msg.data, (uint8_t *)pData, 7);
-		osMessageQueuePut(zerCmd_txHandle, &msg, 0U, 0U);
+			BypassPacket_TypeDef msg;
+			msg.gid = cmd_rx->gid;
+			msg.sid = cmd_rx->sid;
+			msg.cmd = MRS_TX_DATA_OP_ACK;
+			memcpy(msg.data, (uint8_t *)pData, 8);
+			osMessageQueuePut(zerCmd_txHandle, &msg, 0U, 0U);
 
-		break;
-	}
+			break;
+		}
+
 
 	case MRS_RX_MOVE_DEFAULT_POSI: {
 
-		//if(cmd_rx->sid == 12)
-		All_init_flag = 1;
-
+		if(cmd_rx->sid == 12){
+			//new data
+			if(zerSetting[cmd_rx->sid].f_data1 == true){
+				Zer_All_init_flag = INIT_INFO_DEFAULT_POSI_START;
+				zerSetting[cmd_rx->sid].f_data1 = false; //f_data1 가 먼저 수신된 후 data2가 수신되었을때만 유효하다.
+			}
+			else{ //default posi only
+				Zer_All_init_flag = INIT_DEFAULT_POSI_START;
+			}
+		}
 		break;
 	}
 
 	case MRS_RX_MOVE_DEFAULT_POSI_CHECK: {
-		if(All_init_flag == 2){
+		if(Zer_All_init_flag == INIT_OK){
 			BypassPacket_TypeDef msg = {0,};
 			msg.gid = cmd_rx->gid;
 			msg.sid = cmd_rx->sid;

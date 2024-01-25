@@ -32,6 +32,8 @@ extern osMessageQueueId_t zerPosiHandle;
 extern osMessageQueueId_t dxlPosiHandle;
 extern osMessageQueueId_t zerCmd_rxHandle;
 extern osMessageQueueId_t zerCmd_txHandle;
+extern osMessageQueueId_t dxlCmd_rxHandle;
+extern osMessageQueueId_t dxlCmd_txHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 void CAN_FilterConfig(CAN_HandleTypeDef *hcan);
@@ -84,8 +86,13 @@ void main_MRS(void *argument){
 
 	while(1){
 		osDelay(1);
+		osStatus_t status;
+		status = osMessageQueueGet(zerCmd_txHandle, &cmd_tx, NULL, 0U); // wait for message
+		if (status == osOK) {
+			mrs_tx_cmd_process(&cmd_tx);
+		}
 
-		osStatus_t status = osMessageQueueGet(zerCmd_txHandle, &cmd_tx, NULL, 0U); // wait for message
+		status = osMessageQueueGet(dxlCmd_txHandle, &cmd_tx, NULL, 0U); // wait for message
 		if (status == osOK) {
 			mrs_tx_cmd_process(&cmd_tx);
 		}
@@ -101,45 +108,32 @@ void main_MRS(void *argument){
 	}
 }
 
-//void proc_can_rx(void)
-//{
-//	for(int i = 0; i < can_init.cnt; i++){
-//		if(can_rx_ring_buff[i].head != can_rx_ring_buff[i].tail){
-//			prtc_header_t *pPh = (prtc_header_t *)&can_rx_ring_buff[i].can_header[can_rx_ring_buff[i].tail];
-//			for(int j = 0; j < my_can_id_data.sub_id_cnt; j++){
-//				if((pPh->target_id == my_can_id_data.id + 1||pPh->target_id == my_can_id_data.id || pPh->target_id == CAN_ID_BROAD_CAST) && (pPh->target_sub_id == my_can_id_data.sub_id[j] || pPh->target_sub_id == CAN_SUB_ID_BROAD_CAST)){
-//				// 하드코딩 if((pPh->target_id == my_can_id_data.id || pPh->target_id == CAN_ID_BROAD_CAST) && (pPh->target_sub_id == my_can_id_data.sub_id[j] || pPh->target_sub_id == CAN_SUB_ID_BROAD_CAST)){
-//					gm_motion_RX_LED_ON(i);//210218 shs//210430kjh
-//					net_phd_pid(i, &can_rx_ring_buff[i].can_header[can_rx_ring_buff[i].tail], (uint8_t *)&can_rx_ring_buff[i].data[can_rx_ring_buff[i].tail]);
-//					break;
-//				}
-//			}
-//			proc_rx_ring_buff_tail_chk(i);
-//		}
-//	}
-//	gm_motion_RX_LED_OFF();//210218 shs
-//}
+//재정의
+extern can_q_buff_t can_rx_ring_buff[CAN_CNT];
+void proc_can_rx(void)
+{
+	for(int i = 0; i < can_init.cnt; i++){
+		if(can_rx_ring_buff[i].head != can_rx_ring_buff[i].tail){
+			prtc_header_t *pPh = (prtc_header_t *)&can_rx_ring_buff[i].can_header[can_rx_ring_buff[i].tail];
+			if(pPh->cmd == CMD_LFS){
 
-//extern void HAL_CAN_RxFifo0MsgPendingCallback1(CAN_HandleTypeDef *hcan);
-//void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
-//{
-//	if(hcan->Instance == CAN1){
-//		for(int i = 0; i < can_init.cnt; i++){
-//			if(hcan->Instance == can_init.data[i].canhandle->Instance){
-//				if (HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO0, &can_init.data[i].rxheader, (uint8_t *)&can_rx_ring_buff[i].data[can_rx_ring_buff[i].head][0]) != HAL_OK)
-//				{
-//					error_handler();
-//				}
-//				can_rx_ring_buff[i].can_header[can_rx_ring_buff[i].head].dlc = can_init.data[i].rxheader.DLC;
-//				can_rx_ring_buff[i].can_header[can_rx_ring_buff[i].head].protocol_header_32 = can_init.data[i].rxheader.ExtId;
-//				proc_rx_ring_buff_head_chk(i);
-//
-//			}
-//		}
-//	}else if(hcan->Instance == CAN2){
-//		HAL_CAN_RxFifo0MsgPendingCallback1(hcan);
-//	}
-//}
+			}
+			else{
+				for(int j = 0; j < my_can_id_data.sub_id_cnt; j++){
+					if((pPh->target_id == my_can_id_data.id + 1||pPh->target_id == my_can_id_data.id || pPh->target_id == CAN_ID_BROAD_CAST) && (pPh->target_sub_id == my_can_id_data.sub_id[j] || pPh->target_sub_id == CAN_SUB_ID_BROAD_CAST)){
+					// 하드코딩 if((pPh->target_id == my_can_id_data.id || pPh->target_id == CAN_ID_BROAD_CAST) && (pPh->target_sub_id == my_can_id_data.sub_id[j] || pPh->target_sub_id == CAN_SUB_ID_BROAD_CAST)){
+						gm_motion_RX_LED_ON(i);//210218 shs//210430kjh
+						net_phd_pid(i, &can_rx_ring_buff[i].can_header[can_rx_ring_buff[i].tail], (uint8_t *)&can_rx_ring_buff[i].data[can_rx_ring_buff[i].tail]);
+						break;
+					}
+				}
+			}
+			proc_rx_ring_buff_tail_chk(i);
+		}
+	}
+	gm_motion_RX_LED_OFF();//210218 shs
+}
+
 
 void mrs_tx_cmd_process(BypassPacket_TypeDef *cmd_tx){
 
@@ -174,6 +168,18 @@ void mrs_tx_cmd_process(BypassPacket_TypeDef *cmd_tx){
 				0);
 			break;
 		}
+		case MRS_TX_DATA_OP_ACK : {
+			uint8_t data;
+			app_tx_init_sub_pid_driver_data_op_rsp(
+				0,
+				0,
+				cmd_tx->gid,
+				MASTER_CAN_ID,
+				cmd_tx->sid,
+				0,
+				&data);
+			break;
+		}
 		case MRS_TX_MOVE_DEFAULT_POSI_CHECK: {
 			app_tx_init_sub_pid_status_rsp(
 				0,
@@ -188,7 +194,7 @@ void mrs_tx_cmd_process(BypassPacket_TypeDef *cmd_tx){
 		}
 
 		default :
-				break;
+			break;
 		}
 }
 
@@ -215,62 +221,62 @@ void app_rx_init_sub_pid_driver_data1_ctl(uint8_t num, prtc_header_t *pPh, prtc_
 {
 	if(pPh->target_id != MRS_ZER_id && pPh->target_id != MRS_DXL_id)
 		return;
-	prtc_data_ctl_init_driver_data1_t *temp = (prtc_data_ctl_init_driver_data1_t *)pData;
+//prtc_data_ctl_init_driver_data1_t *temp = (prtc_data_ctl_init_driver_data1_t *)pData;
 
-	uint8_t SensorDirection = (uint8_t)temp->direction;
-	uint16_t OppositeLimit = (uint16_t)temp->angle;
-	uint16_t DefaultLocation = (uint16_t)temp->init_position;
-	uint8_t ReductionRatio = (uint8_t)temp->reducer_ratio;
-
+//	uint8_t SensorDirection = (uint8_t)temp->direction;
+//	uint16_t OppositeLimit = (uint16_t)temp->angle;
+//	uint16_t DefaultLocation = (uint16_t)temp->init_position;
+//	uint8_t ReductionRatio = (uint8_t)temp->reducer_ratio;
 
 	BypassPacket_TypeDef msg;
 	msg.gid = pPh->target_id;
 	msg.sid = pPh->target_sub_id;
 	msg.cmd = MRS_RX_DATA1;
-	memcpy(msg.data, (uint8_t *)pData, 7);
+	memcpy(msg.data, (uint8_t *)pData, 8);
+
 	if(pPh->target_id == MRS_ZER_id)
 		osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
+	else if(pPh->target_id == MRS_DXL_id)
+		osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
 
-//	app_tx_init_sub_pid_driver_data1_rsp(
-//		num,
-//		0,
-//		pPh->target_id,
-//		MASTER_CAN_ID,
-//		pPh->target_sub_id,
-//		0,
-//		SensorDirection,
-//		OppositeLimit,
-//		DefaultLocation,
-//		ReductionRatio);
 }
+//op 로 변경
 void app_rx_init_sub_pid_driver_data2_ctl(uint8_t num, prtc_header_t *pPh, prtc_data_ctl_init_driver_data2_t *pData)
 {
 	if(pPh->target_id != MRS_ZER_id && pPh->target_id != MRS_DXL_id)
 		return;
-	prtc_data_ctl_init_driver_data2_t *temp = (prtc_data_ctl_init_driver_data2_t *)pData;
-	uint32_t target_speed = temp->count;
-	uint32_t target_acc = temp->rpm * 100;
+//	prtc_data_ctl_init_driver_data2_t *temp = (prtc_data_ctl_init_driver_data2_t *)pData;
+//	uint32_t target_speed = temp->count;
+//	uint32_t target_acc = temp->rpm * 100;
 
 	BypassPacket_TypeDef msg;
 	msg.gid = pPh->target_id;
 	msg.sid = pPh->target_sub_id;
 	msg.cmd = MRS_RX_DATA2;
-	memcpy(msg.data, (uint8_t *)pData, 7);
+	memcpy(msg.data, (uint8_t *)pData, 8);
+
 	if(pPh->target_id == MRS_ZER_id)
 		osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
-
-//	app_tx_init_sub_pid_driver_data2_rsp(
-//		num,
-//		0,
-//		pPh->target_id,
-//		MASTER_CAN_ID,
-//		pPh->target_sub_id,
-//		0,
-//		temp->count,
-//		temp->rpm);
-
+	else if(pPh->target_id == MRS_DXL_id)
+		osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
 }
 
+void app_rx_init_sub_pid_driver_data_op_ctl(uint8_t num, prtc_header_t *pPh, uint8_t *pData)
+{
+	if(pPh->target_id != MRS_ZER_id && pPh->target_id != MRS_DXL_id)
+		return;
+
+	BypassPacket_TypeDef msg;
+	msg.gid = pPh->target_id;
+	msg.sid = pPh->target_sub_id;
+	msg.cmd = MRS_RX_DATA_OP;
+	memcpy(msg.data, (uint8_t *)pData, 8);
+
+	if(pPh->target_id == MRS_ZER_id)
+		osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
+	else if(pPh->target_id == MRS_DXL_id)
+		osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
+}
 
 void app_rx_init_sub_pid_move_sensor_ctl(uint8_t num, prtc_header_t *pPh, uint8_t *pData)
 {
@@ -332,28 +338,17 @@ void app_rx_init_sub_pid_status_rqt(uint8_t num, prtc_header_t *pPh, prtc_data_r
 		break;
 	case MOVE_INIT_POSITION:
 
-		//todo : 초기위치로 이동 완료하였는지 체크할 것
-		status = 1;//ok
-
 		BypassPacket_TypeDef msg;
 		msg.gid = pPh->target_id;
 		msg.sid = pPh->target_sub_id;
 		msg.cmd = MRS_RX_MOVE_DEFAULT_POSI_CHECK;
-		memcpy(msg.data, (uint8_t *)pData, 7);
+		memcpy(msg.data, (uint8_t *)pData, 8);
 
+		//초기위치로 이동 완료하였는지 확인
 		if(pPh->target_id == MRS_ZER_id)
 			osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
-
-		//idtest
-//		app_tx_init_sub_pid_status_rsp(
-//			num,
-//			0,
-//			pPh->target_id,
-//			MASTER_CAN_ID,
-//			pPh->target_sub_id,
-//			0,
-//			MOVE_INIT_POSITION,
-//			status);
+		else if(pPh->target_id == MRS_DXL_id)
+			osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
 
 		break;
 	}
@@ -363,15 +358,15 @@ void app_rx_init_sub_pid_move_init_position_ctl(uint8_t num, prtc_header_t *pPh,
 	if(pPh->target_id != MRS_ZER_id && pPh->target_id != MRS_DXL_id)
 		return;
 
-	//MAL_Motor_AcPanasonic_SetDefaultLocation(mmotor[0].ctrHandle);
-
 	BypassPacket_TypeDef msg;
 	msg.gid = pPh->target_id;
 	msg.sid = pPh->target_sub_id;
 	msg.cmd = MRS_RX_MOVE_DEFAULT_POSI;
-	//memcpy(msg.data, (uint8_t *)pData, 7);
+
 	if(pPh->target_id == MRS_ZER_id)
 		osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
+	else if(pPh->target_id == MRS_DXL_id)
+		osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
 
  	app_tx_init_sub_pid_move_init_position_rsp(
 		num,
