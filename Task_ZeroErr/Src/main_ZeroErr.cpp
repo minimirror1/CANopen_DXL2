@@ -147,6 +147,7 @@ void main_ZeroErr(void *argument){
 			send_sync(CO);
 		}
 		else if(Zer_All_init_flag == INIT_DEFAULT_POSI_START){
+			osDelay(3000);// 이후 초기위치 이동은 3초 후 시작한다.
 			uint8_t def_result = motors.default_posi();
 			if(def_result == 1)				//성공
 				Zer_All_init_flag = INIT_OK;	//init ok

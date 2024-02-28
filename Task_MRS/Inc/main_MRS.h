@@ -23,7 +23,7 @@ typedef enum{
 	INIT_INFO_DEFAULT_POSI_START,
 	INIT_OK,						//ok -> default posi
 	INIT_FAIL,
-	INIT_DEFAULT_POSI_START
+	INIT_DEFAULT_POSI_START,
 }Init_TypeDef;
 
 typedef struct _MotionPacket_TypeDef{
@@ -43,7 +43,8 @@ typedef enum _BypassCmd_TypeDef{
 	MRS_TX_DATA2_ACK,
 	MRS_TX_DATA_OP_ACK,
 	MRS_TX_MOVE_DEFAULT_POSI_ACK,
-	MRS_TX_MOVE_DEFAULT_POSI_CHECK
+	MRS_TX_MOVE_DEFAULT_POSI_CHECK,
+	MRS_TX_ERROR_MSG
 }BypassCmd_TypeDef;
 
 typedef struct _BypassPacket_TypeDef{

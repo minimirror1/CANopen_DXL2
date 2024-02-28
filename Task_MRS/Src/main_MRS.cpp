@@ -26,6 +26,7 @@
 /* MRS -----------------------------------------------------------------------*/
 #include "app_pid_motion_cmd.h"
 #include "app_pid_init_cmd.h"
+#include "app_pid_error_cmd.h"
 
 /* Private variables ---------------------------------------------------------*/
 extern osMessageQueueId_t zerPosiHandle;
@@ -192,6 +193,24 @@ void mrs_tx_cmd_process(BypassPacket_TypeDef *cmd_tx){
 				MOVE_INIT_POSITION,
 				1);//status 1
 			break;
+		}
+
+		case MRS_TX_ERROR_MSG : {
+
+
+			uint8_t motorType = 0;
+			char errorStr[10] = {0,};
+			app_tx_error_sub_pid_error_level_ctl(
+				0, 					//CAN1
+				0, 					//우선순위
+				cmd_tx->gid,		//srcID
+				MASTER_CAN_ID, 		//tarID
+				cmd_tx->sid,		//srcSubID
+				0, 					//tarSubID
+				motorType, 			//motorType [2] : AC
+				errorStr			//Error String
+				);
+		break;
 		}
 
 		default :
