@@ -196,10 +196,15 @@ void mrs_tx_cmd_process(BypassPacket_TypeDef *cmd_tx){
 		}
 
 		case MRS_TX_ERROR_MSG : {
-
-
 			uint8_t motorType = 0;
-			char errorStr[10] = {0,};
+			if(cmd_tx->gid == MRS_ZER_id){
+				motorType = 4;//ZER
+			}
+			else if(cmd_tx->gid = MRS_DXL_id){
+				motorType = 5;//DXL
+			}
+
+
 			app_tx_error_sub_pid_error_level_ctl(
 				0, 					//CAN1
 				0, 					//우선순위
@@ -208,7 +213,7 @@ void mrs_tx_cmd_process(BypassPacket_TypeDef *cmd_tx){
 				cmd_tx->sid,		//srcSubID
 				0, 					//tarSubID
 				motorType, 			//motorType [2] : AC
-				errorStr			//Error String
+				(char *)cmd_tx->data			//Error String
 				);
 		break;
 		}

@@ -12,7 +12,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-
+#include "string.h"
 /* RTOS ----------------------------------------------------------------------*/
 #include "cmsis_os.h"
 #include "FreeRTOS.h"
@@ -51,6 +51,11 @@ extern osMessageQueueId_t zerCmd_txHandle;
 /* Private function prototypes -----------------------------------------------*/
 void CANopenNode_Init(void);
 void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx);
+
+//240305 fault check
+void zer_statusFaultCheck(void);
+Tick t_statusFault[13];
+
 uint32_t os_rx_cnt = 0;
 void main_ZeroErr(void *argument){
 
@@ -137,14 +142,19 @@ void main_ZeroErr(void *argument){
 			uint8_t init_result = motors.init();
 			if(init_result == 1)				//성공
 				Zer_All_init_flag = INIT_OK;	//init ok
-			else if(init_result == 0)			//실패
+			else if(init_result == 0){			//실패
 				Zer_All_init_flag = INIT_FAIL;	//init fail
+				osDelay(1);
+				send_sync(CO);
+				zer_statusFaultCheck();
+			}
 		}
 		else if(Zer_All_init_flag == INIT_OK){
 			motors.movePosition();
 			send_RPDO_BuffSend(CO);
 			osDelay(1);
 			send_sync(CO);
+			zer_statusFaultCheck();
 		}
 		else if(Zer_All_init_flag == INIT_DEFAULT_POSI_START){
 			osDelay(3000);// 이후 초기위치 이동은 3초 후 시작한다.
@@ -192,10 +202,46 @@ void main_ZeroErr(void *argument){
 	}
 }
 
+uint8_t zergid = 0;//240305
+uint8_t zerErrorTxCnt = 30;
+void zer_statusFaultCheck(void){
+
+	for(int i = 1; i <= 12; i++){
+		ZER_StatusCheck_TypeDef status = motors.getStatusFaultCheck(i);
+		if(status != 999 && status != ZER_STATUS_NONE) {
+
+			if(t_statusFault[i].delay(500) && zerErrorTxCnt != 0){
+				char str[10] = {0,};
+				if(status == ZER_STATUS_FAULT){
+					strcpy(str, "001");	//fault
+				}
+				else if(status == ZER_STATUS_WARNING){
+					strcpy(str, "002");//warning
+				}
+				else if(status == ZER_STATUS_TIMEOUT){
+					strcpy(str, "003");//timeout
+				}
+
+
+				BypassPacket_TypeDef msg = {0,};
+				msg.gid = zergid;
+				msg.sid = i;
+				msg.cmd = MRS_TX_ERROR_MSG;
+				memcpy(msg.data, (uint8_t *)str, 8);
+				osMessageQueuePut(zerCmd_txHandle, &msg, 0U, 0U);
+				Zer_All_init_flag = INIT_FAIL;
+				zerErrorTxCnt--;
+			}
+		}
+	}
+}
+
 void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx) {
 
 	if (cmd_rx->sid > 12)
 		return;
+
+	zergid = cmd_rx->gid;//240305;
 
 	switch (cmd_rx->cmd) {
 	case MRS_RX_DATA1: {

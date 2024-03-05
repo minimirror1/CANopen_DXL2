@@ -54,6 +54,40 @@ void mrs_dxlrx_cmd_process(BypassPacket_TypeDef *cmd_rx);
 void Serial_1_Init(void);
 void Serial_2_Init(void);
 
+//240305
+Tick t_RxMotion;
+uint32_t RxMotion = 0;
+uint8_t dxl_id = 1;
+uint8_t dxl_gid = 0;
+void DXL_StatusFaultCheck(void){
+	uint8_t temp_hwErr = 0;
+	if( 1 <= dxl_id && dxl_id <= 4){
+		temp_hwErr = dxl_1.getHardwareErrorStatus(dxl_id);
+	}
+	else if( 5 <= dxl_id && dxl_id <= 10){
+		temp_hwErr = dxl_2.getHardwareErrorStatus(dxl_id);
+	}
+
+	if(temp_hwErr != 0){
+		char str[10];
+		sprintf(str, "%d", temp_hwErr);
+
+		BypassPacket_TypeDef msg = {0,};
+		msg.gid = dxl_gid;
+		msg.sid = dxl_id;
+		msg.cmd = MRS_TX_ERROR_MSG;
+		memcpy(msg.data,str,8);
+		osMessageQueuePut(dxlCmd_txHandle, &msg, 0U, 0U);
+	}
+
+
+	dxl_id ++;
+	osDelay(50);
+	if(10 < dxl_id){
+		dxl_id = 1;
+		RxMotion = t_RxMotion.getTickCount();
+	}
+}
 
 void main_DXL(void *argument){
 
@@ -110,6 +144,7 @@ void main_DXL(void *argument){
 		status = osMessageQueueGet(dxlCmd_rxHandle, &cmd_rx, NULL, 0U); // wait for message
 		if (status == osOK) {
 			mrs_dxlrx_cmd_process(&cmd_rx);
+			RxMotion = t_RxMotion.getTickCount();
 		}
 
 		if(Dxl_All_init_flag == INIT_INFO_DEFAULT_POSI_START){
@@ -123,6 +158,8 @@ void main_DXL(void *argument){
 				if (status == osOK) {
 					dxl_1.setPosition(motionMsg.sid, motionMsg.posi);
 					dxl_2.setPosition(motionMsg.sid, motionMsg.posi);
+					RxMotion = t_RxMotion.getTickCount();
+					dxl_id = 1;
 				}
 			}while(status == osOK);
 
@@ -134,6 +171,11 @@ void main_DXL(void *argument){
 			HAL_GPIO_TogglePin(LD_DXL1_ERR_GPIO_Port, LD_DXL1_ERR_Pin);
 		if(t_dxl2_run_led.delay(500))
 			HAL_GPIO_TogglePin(LD_DXL2_ERR_GPIO_Port, LD_DXL2_ERR_Pin);
+
+		//240305
+		if(t_RxMotion.elapsed(RxMotion) >= 30000){
+			DXL_StatusFaultCheck();
+		}
 	}
 }
 
@@ -143,6 +185,8 @@ void mrs_dxlrx_cmd_process(BypassPacket_TypeDef *cmd_rx) {
 
 	if (cmd_rx->sid > 12)
 		return;
+
+	dxl_gid = cmd_rx->gid;
 
 	switch (cmd_rx->cmd) {
 	case MRS_RX_DATA1: {
