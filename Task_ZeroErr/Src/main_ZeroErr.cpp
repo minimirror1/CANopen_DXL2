@@ -186,7 +186,7 @@ void main_ZeroErr(void *argument){
 
 
 		//240729
-		if(t_ZerRxMotion.elapsed(zerRxMotion) >= 30000){
+		if(t_ZerRxMotion.elapsed(zerRxMotion) >= 37000){
 			zer_statusFaultCheck();
 			zerRxMotion = t_ZerRxMotion.getTickCount();
 		}

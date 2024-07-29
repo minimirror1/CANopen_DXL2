@@ -182,7 +182,7 @@ void main_DXL(void *argument){
 			HAL_GPIO_TogglePin(LD_DXL2_ERR_GPIO_Port, LD_DXL2_ERR_Pin);
 
 		//240305
-		if(t_RxMotion.elapsed(RxMotion) >= 30000){
+		if(t_RxMotion.elapsed(RxMotion) >= 24000){
 			DXL_StatusFaultCheck();
 		}
 	}
