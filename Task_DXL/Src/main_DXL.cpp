@@ -59,6 +59,9 @@ Tick t_RxMotion;
 uint32_t RxMotion = 0;
 uint8_t dxl_id = 1;
 uint8_t dxl_gid = 0;
+
+uint32_t okCnt = 0;
+uint8_t f_fault = RESET;
 void DXL_StatusFaultCheck(void){
 	uint8_t temp_hwErr = 0;
 	if( 1 <= dxl_id && dxl_id <= 4){
@@ -78,6 +81,8 @@ void DXL_StatusFaultCheck(void){
 		msg.cmd = MRS_TX_ERROR_MSG;
 		memcpy(msg.data,str,8);
 		osMessageQueuePut(dxlCmd_txHandle, &msg, 0U, 0U);
+
+		f_fault = SET;
 	}
 
 
@@ -86,6 +91,10 @@ void DXL_StatusFaultCheck(void){
 	if(10 < dxl_id){
 		dxl_id = 1;
 		RxMotion = t_RxMotion.getTickCount();
+
+		if(f_fault == RESET){
+			okCnt ++;
+		}
 	}
 }
 
