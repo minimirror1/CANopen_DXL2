@@ -309,6 +309,13 @@ void mrs_dxlrx_cmd_process(BypassPacket_TypeDef *cmd_rx) {
 		}
 		break;
 	}
+
+	case MRS_TX_MOTOR_STATUS_CHECK :{
+		//240729
+
+		break;
+	}
+
 	default:
 		break;
 	}

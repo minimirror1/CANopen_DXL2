@@ -48,6 +48,8 @@ uint8_t idRead(
 uint8_t MRS_DXL_id = 0;
 uint8_t MRS_ZER_id = 0;
 
+Tick motionRx_Timeout;
+
 void main_MRS(void *argument){
 
 	Tick runLED;
@@ -85,6 +87,9 @@ void main_MRS(void *argument){
 			1,
 			0);
 
+	//247029
+	motionRx_Timeout.tickUpdate();
+
 	while(1){
 		osDelay(1);
 		osStatus_t status;
@@ -105,6 +110,21 @@ void main_MRS(void *argument){
 
 		if(runLED.delay(500)){
 			HAL_GPIO_TogglePin(LD_RUN_GPIO_Port, LD_RUN_Pin);
+		}
+
+		//240729
+		if(motionRx_Timeout.tickCheck(20000)){
+			BypassPacket_TypeDef msg;
+			msg.gid = 0;
+			msg.sid = 0;
+			msg.cmd = MRS_TX_MOTOR_STATUS_CHECK;
+			memset(msg.data, 0x00, 8);
+
+			osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
+			osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
+
+			//다시 시간 측정
+			motionRx_Timeout.tickUpdate();
 		}
 	}
 }
@@ -243,6 +263,9 @@ void app_rx_motion_sub_pid_adc_ctl(uint8_t num, prtc_header_t *pPh, prtc_data_ct
 	else if(pPh->target_id == MRS_DXL_id){
 		osMessageQueuePut(dxlPosiHandle, &motionMsg, 0U, 0U);
 	}
+
+	//240729
+	motionRx_Timeout.tickUpdate();	//새 모션이 수신되면 시간을 업데이트
 
 }
 

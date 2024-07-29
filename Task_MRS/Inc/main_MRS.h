@@ -44,7 +44,8 @@ typedef enum _BypassCmd_TypeDef{
 	MRS_TX_DATA_OP_ACK,
 	MRS_TX_MOVE_DEFAULT_POSI_ACK,
 	MRS_TX_MOVE_DEFAULT_POSI_CHECK,
-	MRS_TX_ERROR_MSG
+	MRS_TX_ERROR_MSG,
+	MRS_TX_MOTOR_STATUS_CHECK		//240729 모터 상태 확인
 }BypassCmd_TypeDef;
 
 typedef struct _BypassPacket_TypeDef{

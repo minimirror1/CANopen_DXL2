@@ -55,8 +55,13 @@ void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx);
 //240305 fault check
 void zer_statusFaultCheck(void);
 Tick t_statusFault[13];
+uint32_t zerRxMotion = 0;
+Tick t_ZerRxMotion;
 
 uint32_t os_rx_cnt = 0;
+
+
+
 void main_ZeroErr(void *argument){
 
 
@@ -136,6 +141,7 @@ void main_ZeroErr(void *argument){
 		status = osMessageQueueGet(zerCmd_rxHandle, &cmd_rx, NULL, 0U); // wait for message
 		if (status == osOK) {
 			mrs_zerrx_cmd_process(&cmd_rx);
+			zerRxMotion = t_ZerRxMotion.getTickCount();
 		}
 
 		if(Zer_All_init_flag == INIT_INFO_DEFAULT_POSI_START){
@@ -154,7 +160,7 @@ void main_ZeroErr(void *argument){
 			send_RPDO_BuffSend(CO);
 			osDelay(1);
 			send_sync(CO);
-			zer_statusFaultCheck();
+			//zer_statusFaultCheck();
 		}
 		else if(Zer_All_init_flag == INIT_DEFAULT_POSI_START){
 			osDelay(3000);// 이후 초기위치 이동은 3초 후 시작한다.
@@ -172,9 +178,17 @@ void main_ZeroErr(void *argument){
 		        if (status == osOK) {
 		        	motors.setPosition(motionMsg.sid, motionMsg.posi);
 					os_rx_cnt++;
+					zerRxMotion = t_ZerRxMotion.getTickCount();
 				}
 		    } while (status == osOK); // 큐가 비어있지 않는 동안 계속 반복
 			osDelay(1);
+		}
+
+
+		//240729
+		if(t_ZerRxMotion.elapsed(zerRxMotion) >= 30000){
+			zer_statusFaultCheck();
+			zerRxMotion = t_ZerRxMotion.getTickCount();
 		}
 		//osDelay(9);
 
@@ -338,6 +352,11 @@ void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx) {
 			msg.cmd = MRS_TX_MOVE_DEFAULT_POSI_CHECK;
 			osMessageQueuePut(zerCmd_txHandle, &msg, 0U, 0U);
 		}
+		break;
+	}
+	case MRS_TX_MOTOR_STATUS_CHECK :{
+		//240729
+
 		break;
 	}
 	default:
