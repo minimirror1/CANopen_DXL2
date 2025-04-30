@@ -47,12 +47,36 @@ target_link_directories(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user sources here
+    # Add user sources here    
+    # GM_DL 구현 파일
+    Component/gm_motion_CANprotocol/common/GM_DL/Src/dl_can.c
+    Component/gm_motion_CANprotocol/common/GM_DL/Src/dl_can_rx.c
+    Component/gm_motion_CANprotocol/common/GM_DL/Src/dl_can_tx.c
+    
+    # GM_NET/PHD 구현 파일
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid.c
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_speaker.c
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_sensor.c
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_motion.c
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_midi.c
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_inspection.c
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_lfs.c
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_init.c
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_error.c
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_edit.c
 )
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
-    # Add user defined include paths
+    # gm_motion_CANprotocol 파일이 있는 경로 추가
+    Component/gm_motion_CANprotocol/common/GM_APP/Inc
+    Component/gm_motion_CANprotocol/common/GM_DL/Inc
+    Component/gm_motion_CANprotocol/common/GM_NET/PDA/Inc
+    Component/gm_motion_CANprotocol/common/GM_NET/PHA/Inc
+    Component/gm_motion_CANprotocol/common/GM_NET/PHD/Inc
+    Component/gm_motion_CANprotocol/common/GM_ERR/Inc
+    Component/gm_motion_CANprotocol/common/GM_PRTC/Inc
+    # 다른 필요한 헤더 파일 경로
 )
 
 # Add project symbols (macros)
@@ -63,6 +87,6 @@ target_compile_definitions(${CMAKE_PROJECT_NAME} PRIVATE
 # Add linked libraries
 target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
-
+    
     # Add user defined libraries
 )

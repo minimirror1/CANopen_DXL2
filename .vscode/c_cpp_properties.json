@@ -10,7 +10,11 @@
              */
             "name": "STM32",
             "configurationProvider": "ms-vscode.cmake-tools",
-            "intelliSenseMode": "${default}"
+            "intelliSenseMode": "${default}",
+            "includePath": [
+                "${workspaceFolder}/Component/gm_motion_CANprotocol/common/GM_DL/Inc",
+                "${workspaceFolder}/Component/gm_motion_CANprotocol/common/GM_NET/PHD/Inc"
+            ]
         }
     ]
 }
