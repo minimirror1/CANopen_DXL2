@@ -30,46 +30,4 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>Component/CANopenNode</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_CANopen/CANopenNode</locationURI>
-		</link>
-		<link>
-			<name>Component/CANopenNode_Com</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_CANopen/CANopenNode_Com</locationURI>
-		</link>
-		<link>
-			<name>Component/CANopenNode_STM32</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_CANopen/CANopenNode_STM32</locationURI>
-		</link>
-		<link>
-			<name>Component/cpp_DXL_SDK</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_DXL_SDK</locationURI>
-		</link>
-		<link>
-			<name>Component/cpp_serial</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_serial</locationURI>
-		</link>
-		<link>
-			<name>Component/cpp_tick</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_tick</locationURI>
-		</link>
-		<link>
-			<name>Component/gm_motion_CANprotocol</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/driver/gm_motion_CANprotocol</locationURI>
-		</link>
-		<link>
-			<name>Task_DXL/cpp_DXL_Class</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/cpp_driver/cpp_DXL_Class</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>

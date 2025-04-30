@@ -8,7 +8,6 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "can.h"
-#include "usart.h"
 #include "gpio.h"
 #include "string.h"
 
@@ -30,11 +29,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 extern osMessageQueueId_t zerPosiHandle;
-extern osMessageQueueId_t dxlPosiHandle;
 extern osMessageQueueId_t zerCmd_rxHandle;
 extern osMessageQueueId_t zerCmd_txHandle;
-extern osMessageQueueId_t dxlCmd_rxHandle;
-extern osMessageQueueId_t dxlCmd_txHandle;
 
 /* Private function prototypes -----------------------------------------------*/
 void CAN_FilterConfig(CAN_HandleTypeDef *hcan);
@@ -56,24 +52,19 @@ void main_MRS(void *argument){
 	BypassPacket_TypeDef cmd_tx;
 	/* MRS protocol */
 	can_init_data_save(&hcan1);
-	gm_motion_TX_LED_init(LD_MRS_TX_GPIO_Port, LD_MRS_TX_Pin, GPIO_PIN_RESET);
-	gm_motion_RX_LED_init(LD_MRS_RX_GPIO_Port, LD_MRS_RX_Pin, GPIO_PIN_RESET);
+	gm_motion_TX_LED_init(LD_CAN1_TX_GPIO_Port, LD_CAN1_TX_Pin, GPIO_PIN_RESET);
+	gm_motion_RX_LED_init(LD_CAN1_RX_GPIO_Port, LD_CAN1_RX_Pin, GPIO_PIN_RESET);
 
 	CAN_FilterConfig(&hcan1);
 
 	MRS_ZER_id = idRead(
-			ZER_ID_01_GPIO_Port, ZER_ID_01_Pin,
-			ZER_ID_02_GPIO_Port, ZER_ID_02_Pin,
-			ZER_ID_04_GPIO_Port, ZER_ID_04_Pin,
-			ZER_ID_08_GPIO_Port, ZER_ID_08_Pin,
+			ID_01_GPIO_Port, ID_01_Pin,
+			ID_02_GPIO_Port, ID_02_Pin,
+			ID_04_GPIO_Port, ID_04_Pin,
+			ID_08_GPIO_Port, ID_08_Pin,
 			GPIO_PIN_RESET);
 
-	MRS_DXL_id = idRead(
-			DXL_ID_01_GPIO_Port, DXL_ID_01_Pin,
-			DXL_ID_02_GPIO_Port, DXL_ID_02_Pin,
-			DXL_ID_04_GPIO_Port, DXL_ID_04_Pin,
-			DXL_ID_08_GPIO_Port, DXL_ID_08_Pin,
-			GPIO_PIN_RESET);
+
 
 	set_my_can_id(MRS_ZER_id);
 	add_my_can_sub_id(1, 28);
@@ -98,11 +89,6 @@ void main_MRS(void *argument){
 			mrs_tx_cmd_process(&cmd_tx);
 		}
 
-		status = osMessageQueueGet(dxlCmd_txHandle, &cmd_tx, NULL, 0U); // wait for message
-		if (status == osOK) {
-			mrs_tx_cmd_process(&cmd_tx);
-		}
-
 
 		/* MRS Protocol */
 		proc_can_rx();
@@ -121,7 +107,7 @@ void main_MRS(void *argument){
 			memset(msg.data, 0x00, 8);
 
 			osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
-			osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
+
 
 			//다시 시간 측정
 			motionRx_Timeout.tickUpdate();
@@ -220,9 +206,7 @@ void mrs_tx_cmd_process(BypassPacket_TypeDef *cmd_tx){
 			if(cmd_tx->gid == MRS_ZER_id){
 				motorType = 4;//ZER
 			}
-			else if(cmd_tx->gid = MRS_DXL_id){
-				motorType = 5;//DXL
-			}
+
 
 
 			app_tx_error_sub_pid_error_level_ctl(
@@ -260,9 +244,7 @@ void app_rx_motion_sub_pid_adc_ctl(uint8_t num, prtc_header_t *pPh, prtc_data_ct
 		osMessageQueuePut(zerPosiHandle, &motionMsg, 0U, 0U);
 		can_rx_cnt++;
 	}
-	else if(pPh->target_id == MRS_DXL_id){
-		osMessageQueuePut(dxlPosiHandle, &motionMsg, 0U, 0U);
-	}
+
 
 	//240729
 	motionRx_Timeout.tickUpdate();	//새 모션이 수신되면 시간을 업데이트
@@ -289,8 +271,7 @@ void app_rx_init_sub_pid_driver_data1_ctl(uint8_t num, prtc_header_t *pPh, prtc_
 
 	if(pPh->target_id == MRS_ZER_id)
 		osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
-	else if(pPh->target_id == MRS_DXL_id)
-		osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
+
 
 }
 //op 로 변경
@@ -310,8 +291,7 @@ void app_rx_init_sub_pid_driver_data2_ctl(uint8_t num, prtc_header_t *pPh, prtc_
 
 	if(pPh->target_id == MRS_ZER_id)
 		osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
-	else if(pPh->target_id == MRS_DXL_id)
-		osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
+
 }
 
 void app_rx_init_sub_pid_driver_data_op_ctl(uint8_t num, prtc_header_t *pPh, uint8_t *pData)
@@ -327,8 +307,7 @@ void app_rx_init_sub_pid_driver_data_op_ctl(uint8_t num, prtc_header_t *pPh, uin
 
 	if(pPh->target_id == MRS_ZER_id)
 		osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
-	else if(pPh->target_id == MRS_DXL_id)
-		osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
+
 }
 
 void app_rx_init_sub_pid_move_sensor_ctl(uint8_t num, prtc_header_t *pPh, uint8_t *pData)
@@ -400,8 +379,7 @@ void app_rx_init_sub_pid_status_rqt(uint8_t num, prtc_header_t *pPh, prtc_data_r
 		//초기위치로 이동 완료하였는지 확인
 		if(pPh->target_id == MRS_ZER_id)
 			osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
-		else if(pPh->target_id == MRS_DXL_id)
-			osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
+
 
 		break;
 	}
@@ -418,8 +396,7 @@ void app_rx_init_sub_pid_move_init_position_ctl(uint8_t num, prtc_header_t *pPh,
 
 	if(pPh->target_id == MRS_ZER_id)
 		osMessageQueuePut(zerCmd_rxHandle, &msg, 0U, 0U);
-	else if(pPh->target_id == MRS_DXL_id)
-		osMessageQueuePut(dxlCmd_rxHandle, &msg, 0U, 0U);
+
 
  	app_tx_init_sub_pid_move_init_position_rsp(
 		num,

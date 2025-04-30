@@ -10,7 +10,6 @@
 #include "main.h"
 #include "can.h"
 #include "tim.h"
-#include "usart.h"
 #include "gpio.h"
 #include "string.h"
 /* RTOS ----------------------------------------------------------------------*/
@@ -23,7 +22,6 @@
 #include "main_MRS.h"
 
 /* Component -----------------------------------------------------------------*/
-#include "cpp_serial.h"
 #include "cpp_tick.h"
 
 /* CANopen SDK ---------------------------------------------------------------*/
@@ -85,7 +83,8 @@ void main_ZeroErr(void *argument){
 	NMTmaster->internalCommand = CO_NMT_ENTER_OPERATIONAL;
 
 	motors.motorsInit(CO, 1, 12);
-	motors.init_status_led(LD_ZER_ERR_GPIO_Port, LD_ZER_ERR_Pin, GPIO_PIN_RESET);
+
+	//motors.init_status_led(LD_ZER_ERR_GPIO_Port, LD_ZER_ERR_Pin, GPIO_PIN_RESET);
 
 #if 0
 	motors.add_motor(1 , ROT_CW  ,90  ,262144, 262144);
@@ -212,7 +211,7 @@ void main_ZeroErr(void *argument){
 #endif
 
 
-		HAL_GPIO_TogglePin(LD_ZER_TX_GPIO_Port, LD_ZER_TX_Pin);
+		HAL_GPIO_TogglePin(LD_CAN2_TX_GPIO_Port, LD_CAN2_TX_Pin);
 	}
 }
 

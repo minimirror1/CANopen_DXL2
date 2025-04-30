@@ -25,7 +25,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "main_DXL.h"
 #include "main_MRS.h"
 #include "main_ZeroErr.h"
 /* USER CODE END Includes */
@@ -70,22 +69,10 @@ const osThreadAttr_t zeroErrTask_attributes = {
   .stack_size = 1024 * 4,
   .priority = (osPriority_t) osPriorityRealtime,
 };
-/* Definitions for DXL_Task */
-osThreadId_t DXL_TaskHandle;
-const osThreadAttr_t DXL_Task_attributes = {
-  .name = "DXL_Task",
-  .stack_size = 1024 * 4,
-  .priority = (osPriority_t) osPriorityHigh7,
-};
 /* Definitions for zerPosi */
 osMessageQueueId_t zerPosiHandle;
 const osMessageQueueAttr_t zerPosi_attributes = {
   .name = "zerPosi"
-};
-/* Definitions for dxlPosi */
-osMessageQueueId_t dxlPosiHandle;
-const osMessageQueueAttr_t dxlPosi_attributes = {
-  .name = "dxlPosi"
 };
 /* Definitions for zerCmd_rx */
 osMessageQueueId_t zerCmd_rxHandle;
@@ -97,16 +84,6 @@ osMessageQueueId_t zerCmd_txHandle;
 const osMessageQueueAttr_t zerCmd_tx_attributes = {
   .name = "zerCmd_tx"
 };
-/* Definitions for dxlCmd_rx */
-osMessageQueueId_t dxlCmd_rxHandle;
-const osMessageQueueAttr_t dxlCmd_rx_attributes = {
-  .name = "dxlCmd_rx"
-};
-/* Definitions for dxlCmd_tx */
-osMessageQueueId_t dxlCmd_txHandle;
-const osMessageQueueAttr_t dxlCmd_tx_attributes = {
-  .name = "dxlCmd_tx"
-};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -116,7 +93,6 @@ const osMessageQueueAttr_t dxlCmd_tx_attributes = {
 void StartDefaultTask(void *argument);
 extern void main_MRS(void *argument);
 extern void main_ZeroErr(void *argument);
-extern void main_DXL(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -146,20 +122,11 @@ void MX_FREERTOS_Init(void) {
   /* creation of zerPosi */
   zerPosiHandle = osMessageQueueNew (40, sizeof(MotionPacket_TypeDef), &zerPosi_attributes);
 
-  /* creation of dxlPosi */
-  dxlPosiHandle = osMessageQueueNew (40, sizeof(MotionPacket_TypeDef), &dxlPosi_attributes);
-
   /* creation of zerCmd_rx */
   zerCmd_rxHandle = osMessageQueueNew (40, sizeof(BypassPacket_TypeDef), &zerCmd_rx_attributes);
 
   /* creation of zerCmd_tx */
   zerCmd_txHandle = osMessageQueueNew (40, sizeof(BypassPacket_TypeDef), &zerCmd_tx_attributes);
-
-  /* creation of dxlCmd_rx */
-  dxlCmd_rxHandle = osMessageQueueNew (40, sizeof(BypassPacket_TypeDef), &dxlCmd_rx_attributes);
-
-  /* creation of dxlCmd_tx */
-  dxlCmd_txHandle = osMessageQueueNew (40, sizeof(BypassPacket_TypeDef), &dxlCmd_tx_attributes);
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
@@ -174,9 +141,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of zeroErrTask */
   zeroErrTaskHandle = osThreadNew(main_ZeroErr, NULL, &zeroErrTask_attributes);
-
-  /* creation of DXL_Task */
-  DXL_TaskHandle = osThreadNew(main_DXL, NULL, &DXL_Task_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
