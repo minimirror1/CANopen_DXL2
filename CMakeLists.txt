@@ -64,6 +64,31 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_init.c
     Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_error.c
     Component/gm_motion_CANprotocol/common/GM_NET/PHD/Src/net_phd_pid_edit.c
+    
+    # CANopenNode 구현 파일
+    Component/CANopenNode_Com/sync.cpp
+    Component/CANopenNode_Com/sdo.cpp
+    Component/CANopenNode_Com/pdo.cpp
+    Component/CANopenNode_STM32/CO_app_STM32.c
+    Component/CANopenNode_STM32/CO_driver_STM32.c
+    Component/CANopenNode_STM32/CO_storageBlank.c
+    Component/cpp_tick/cpp_tick.cpp
+    
+    # CANopenNode 핵심 파일
+    Component/CANopenNode/CANopen.c
+    Component/CANopenNode/301/CO_Emergency.c
+    Component/CANopenNode/301/CO_fifo.c
+    Component/CANopenNode/301/CO_HBconsumer.c
+    Component/CANopenNode/301/CO_NMT_Heartbeat.c
+    Component/CANopenNode/301/CO_ODinterface.c
+    Component/CANopenNode/301/CO_PDO.c
+    Component/CANopenNode/301/CO_SDOclient.c
+    Component/CANopenNode/301/CO_SDOserver.c
+    Component/CANopenNode/301/CO_SYNC.c
+    Component/CANopenNode/301/CO_TIME.c
+    Component/CANopenNode/301/crc16-ccitt.c
+    Component/CANopenNode/storage/CO_storage.c
+    Component/CANopenNode/storage/CO_storageEeprom.c
 )
 
 # Add include paths
@@ -76,6 +101,19 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     Component/gm_motion_CANprotocol/common/GM_NET/PHD/Inc
     Component/gm_motion_CANprotocol/common/GM_ERR/Inc
     Component/gm_motion_CANprotocol/common/GM_PRTC/Inc
+    # Task_ZeroErr 헤더 파일 경로 추가
+    Task_ZeroErr/Inc
+    Task_MRS/Inc
+    # cpp_tick 헤더 파일 경로 추가
+    Component/cpp_tick
+    # CANopen 관련 헤더 파일 경로 추가
+    Component/CANopenNode_Com
+    Component/CANopenNode_STM32
+    # CANopenNode 라이브러리 추가
+    Component/CANopenNode
+    Component/CANopenNode/301
+    Component/CANopenNode/storage
+    Component/CANopenNode/example
     # 다른 필요한 헤더 파일 경로
 )
 
