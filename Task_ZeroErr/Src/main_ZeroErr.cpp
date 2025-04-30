@@ -85,6 +85,15 @@ void main_ZeroErr(void *argument){
 	motors.motorsInit(CO, 1, 12);
 
 	//motors.init_status_led(LD_ZER_ERR_GPIO_Port, LD_ZER_ERR_Pin, GPIO_PIN_RESET);
+	motors.add_motor(
+		3 , 
+		ROT_CW  ,
+		60  ,
+		174763, 
+		174763,
+		2048);
+
+	Zer_All_init_flag = INIT_INFO_DEFAULT_POSI_START;
 
 #if 0
 	motors.add_motor(1 , ROT_CW  ,90  ,262144, 262144);
