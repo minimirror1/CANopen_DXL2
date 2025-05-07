@@ -95,7 +95,7 @@ void main_ZeroErr(void *argument){
     CO_NMT_t *NMTmaster = CO->NMT;
     NMTmaster->internalCommand = CO_NMT_ENTER_OPERATIONAL;
 
-    motors.motorsInit(CO, 1, 12);
+    motors.motorsInit(CO, 1, 30);
 
     //motors.init_status_led(LD_ZER_ERR_GPIO_Port, LD_ZER_ERR_Pin, GPIO_PIN_RESET);
     motors.add_motor(
@@ -106,7 +106,18 @@ void main_ZeroErr(void *argument){
         174763,
         2048);
 
-    Zer_All_init_flag = INIT_INFO_DEFAULT_POSI_START;
+    motors.add_motor(
+        4 ,
+        ROT_CW  ,
+        60  ,
+        174763,
+        174763,
+        2048);
+
+    motors.init_motor(3);
+    motors.init_motor(4);
+
+    //Zer_All_init_flag = INIT_INFO_DEFAULT_POSI_START;
 
     while(1){
 #ifdef CANOPEN_MODE
