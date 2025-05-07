@@ -95,49 +95,6 @@ void main_ZeroErr(void *argument){
 
 	Zer_All_init_flag = INIT_INFO_DEFAULT_POSI_START;
 
-#if 0
-	motors.add_motor(1 , ROT_CW  ,90  ,262144, 262144);
-	motors.add_motor(2 , ROT_CCW ,90  ,174763, 174763);
-	motors.add_motor(3 , ROT_CW  ,60  ,174763, 174763);
-	motors.add_motor(4 , ROT_CW  ,130 ,174763, 174763);
-
-	motors.add_motor(5 , ROT_CCW ,210 ,262144, 262144);
-	motors.add_motor(6 , ROT_CW  ,160 ,262144, 262144);
-	motors.add_motor(7 , ROT_CCW ,60  ,262144, 262144);
-	motors.add_motor(8 , ROT_CCW ,40  ,262144, 262144);
-
-	motors.add_motor(9 , ROT_CW  ,210 ,262144, 262144);
-	motors.add_motor(10, ROT_CCW ,160 ,262144, 262144);
-	motors.add_motor(11, ROT_CW  ,60  ,262144, 262144);
-	motors.add_motor(12, ROT_CW  ,40  ,262144, 262144);
-#endif
-#if 1
-#ifdef CANOPEN_MODE
-	//조종기 초기위치
-	//motors.add_motor(10, ROT_CCW ,160 ,10000, 5566, 4095);
-
-#else
-	//조종기 초기위치
-//	motors.add_motor(1 , ROT_CW  ,90  ,262144, 262144, 2048);
-//	motors.add_motor(2 , ROT_CCW ,90  ,174763, 174763, 1020);
-//	motors.add_motor(3 , ROT_CW  ,60  ,174763, 174763, 2048);
-//	motors.add_motor(4 , ROT_CW  ,130 ,174763, 174763, 936);
-////
-//	motors.add_motor(5 , ROT_CCW ,210 ,262144, 262144, 624);
-//	motors.add_motor(6 , ROT_CW  ,160 ,262144, 262144, 12);
-//	motors.add_motor(7 , ROT_CCW ,60  ,262144, 262144, 2041);
-//	motors.add_motor(8 , ROT_CCW ,40  ,262144, 262144, 2048);
-////
-//	motors.add_motor(9 , ROT_CW  ,210 ,262144, 262144, 626);
-	motors.add_motor(10, ROT_CCW ,160 ,262144, 262144, 48);
-//	motors.add_motor(11, ROT_CW  ,60  ,262144, 262144, 2170);
-//	motors.add_motor(12, ROT_CW  ,40  ,262144, 262144, 2048);
-#endif
-#endif
-    //motors.init();
-
-   //osDelay(1000);
-    //motors.setPosition(10,4094);
 
 	while(1){
 
@@ -192,35 +149,10 @@ void main_ZeroErr(void *argument){
 			osDelay(1);
 		}
 
-
-		//240729
 		if(t_ZerRxMotion.elapsed(zerRxMotion) >= 37000){
 			zer_statusFaultCheck();
 			zerRxMotion = t_ZerRxMotion.getTickCount();
 		}
-		//osDelay(9);
-
-
-
-//		osDelay(5);
-//		motors.setAllControlbit();
-//		osDelay(5);
-//		send_sync(CO);
-#else
-		osStatus_t status = osMessageQueueGet(zerPosiHandle, &motionMsg, NULL, 0U); // wait for message
-		if (status == osOK) {
-			motors.setPosition(motionMsg.sid, motionMsg.posi);
-		}
-		motors.movePosition();
-
-		send_RPDO_1_BuffSend(CO);
-
-		send_sync(CO);
-		osDelay(10);
-#endif
-
-
-		HAL_GPIO_TogglePin(LD_CAN2_TX_GPIO_Port, LD_CAN2_TX_Pin);
 	}
 }
 
