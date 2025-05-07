@@ -47,6 +47,7 @@ extern osMessageQueueId_t zerCmd_rxHandle;
 extern osMessageQueueId_t zerCmd_txHandle;
 
 /* Private function prototypes -----------------------------------------------*/
+void ZER_Init_Process(void);
 void CANopenNode_Init(void);
 void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx);
 
@@ -109,32 +110,8 @@ void main_ZeroErr(void *argument){
 			zerRxMotion = t_ZerRxMotion.getTickCount();
 		}
 
-		if(Zer_All_init_flag == INIT_INFO_DEFAULT_POSI_START){
-			uint8_t init_result = motors.init();
-			if(init_result == 1)				//성공
-				Zer_All_init_flag = INIT_OK;	//init ok
-			else if(init_result == 0){			//실패
-				Zer_All_init_flag = INIT_FAIL;	//init fail
-				osDelay(1);
-				send_sync(CO);
-				zer_statusFaultCheck();
-			}
-		}
-		else if(Zer_All_init_flag == INIT_OK){
-			motors.movePosition();
-			send_RPDO_BuffSend(CO);
-			osDelay(1);
-			send_sync(CO);
-			//zer_statusFaultCheck();
-		}
-		else if(Zer_All_init_flag == INIT_DEFAULT_POSI_START){
-			osDelay(3000);// 이후 초기위치 이동은 3초 후 시작한다.
-			uint8_t def_result = motors.default_posi();
-			if(def_result == 1)				//성공
-				Zer_All_init_flag = INIT_OK;	//init ok
-			else if(def_result == 0)			//실패
-				Zer_All_init_flag = INIT_FAIL;	//init fail
-		}
+		ZER_Init_Process();
+
 
 		for(int time = 0; time < 9; time++ ){
 		    do {
@@ -153,6 +130,36 @@ void main_ZeroErr(void *argument){
 			zer_statusFaultCheck();
 			zerRxMotion = t_ZerRxMotion.getTickCount();
 		}
+	}
+}
+
+void ZER_Init_Process(void){
+
+	if(Zer_All_init_flag == INIT_INFO_DEFAULT_POSI_START){
+		uint8_t init_result = motors.init();
+		if(init_result == 1)				//성공
+			Zer_All_init_flag = INIT_OK;	//init ok
+		else if(init_result == 0){			//실패
+			Zer_All_init_flag = INIT_FAIL;	//init fail
+			osDelay(1);
+			send_sync(CO);
+			zer_statusFaultCheck();
+		}
+	}
+	else if(Zer_All_init_flag == INIT_OK){
+		motors.movePosition();
+		send_RPDO_BuffSend(CO);
+		osDelay(1);
+		send_sync(CO);
+		//zer_statusFaultCheck();
+	}
+	else if(Zer_All_init_flag == INIT_DEFAULT_POSI_START){
+		osDelay(3000);// 이후 초기위치 이동은 3초 후 시작한다.
+		uint8_t def_result = motors.default_posi();
+		if(def_result == 1)				//성공
+			Zer_All_init_flag = INIT_OK;	//init ok
+		else if(def_result == 0)			//실패
+			Zer_All_init_flag = INIT_FAIL;	//init fail
 	}
 }
 
