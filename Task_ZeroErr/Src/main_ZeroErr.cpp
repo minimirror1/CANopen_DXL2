@@ -101,21 +101,24 @@ void main_ZeroErr(void *argument){
     motors.add_motor(
         3 , 
         ROT_CW  ,
-        60  ,
+        359  ,
         174763, 
         174763,
-        2048);
+        4095);
 
     motors.add_motor(
         4 ,
         ROT_CW  ,
-        60  ,
+        359  ,
         174763,
         174763,
-        2048);
+        4095);
 
     motors.init_motor(3);
     motors.init_motor(4);
+
+	motors.init_default_posi(3);
+	motors.init_default_posi(4);
 
     //Zer_All_init_flag = INIT_INFO_DEFAULT_POSI_START;
 
@@ -125,6 +128,8 @@ void main_ZeroErr(void *argument){
         mrsComm.processPositionQueue();
         mrsComm.checkCommunicationStatus();
         ZER_Init_Process();
+
+        motors.default_posi_check_process();
 #endif
     }
 }
