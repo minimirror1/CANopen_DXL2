@@ -33,104 +33,89 @@
 /* Motor Class ---------------------------------------------------------------*/
 #include "CANopen_Motor.h"
 
+/* MRS Communication -----------------------------------------------------------*/
+#include "MRS_Communication.h"
+
 /* Private variables ---------------------------------------------------------*/
+/* CANopen 관련 변수 */
 extern CO_t* CO;
+CANopenNodeSTM32 canOpenNodeSTM32; // 전역 변수로 선언
+
+/* 모터 및 통신 관련 변수 */
 Motors motors;
+MRS_Communication mrsComm;
 
-
+/* 상태 관련 변수 */
 Init_TypeDef Zer_All_init_flag = INIT_NONE;//0:none, 1:start init, 2:init ok, 3:init fail
-
 ZerSetting_TypeDef zerSetting[20] = {0,};
 
+/* 큐 핸들 */
 extern osMessageQueueId_t zerPosiHandle;
 extern osMessageQueueId_t zerCmd_rxHandle;
 extern osMessageQueueId_t zerCmd_txHandle;
 
-/* Private function prototypes -----------------------------------------------*/
-void ZER_Init_Process(void);
-void CANopenNode_Init(void);
-void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx);
-
-//240305 fault check
-void zer_statusFaultCheck(void);
+/* 에러 체크 관련 변수 - 240305 추가 */
+uint8_t zergid = 0;
+uint8_t zerErrorTxCnt = 30;
 Tick t_statusFault[13];
 uint32_t zerRxMotion = 0;
 Tick t_ZerRxMotion;
 
+/* 카운터 변수 */
 uint32_t os_rx_cnt = 0;
 
+/* Private function prototypes -----------------------------------------------*/
+/* 초기화 및 프로세스 관련 함수 */
+void ZER_Init_Process(void);
+void CANopenNode_Init(void);
 
+/* 통신 처리 관련 함수 */
+void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx);
+void zer_statusFaultCheck(void);
+
+
+
+
+void CANopenNode_Init(void){
+    canOpenNodeSTM32.CANHandle = &hcan2;
+    canOpenNodeSTM32.HWInitFunction = MX_CAN2_Init;
+    canOpenNodeSTM32.timerHandle = &htim14;
+    canOpenNodeSTM32.desiredNodeID = 60;
+    canOpenNodeSTM32.baudrate = 1000;
+    canopen_app_init(&canOpenNodeSTM32);
+}
 
 void main_ZeroErr(void *argument){
+    /* CANopen Init */
+    //CANopenNode_Init();
 
+	CANopenNode_Init();
+    TPDO1_rx_init();
 
-	//osDelay(10000);
-	MotionPacket_TypeDef motionMsg;
-	BypassPacket_TypeDef cmd_rx;
+    CO_NMT_t *NMTmaster = CO->NMT;
+    NMTmaster->internalCommand = CO_NMT_ENTER_OPERATIONAL;
 
-	/* CANopen Init */
-	//CANopenNode_Init();
+    motors.motorsInit(CO, 1, 12);
 
-	CANopenNodeSTM32 canOpenNodeSTM32;
-	canOpenNodeSTM32.CANHandle = &hcan2;
-	canOpenNodeSTM32.HWInitFunction = MX_CAN2_Init;
-	canOpenNodeSTM32.timerHandle = &htim14;
-	canOpenNodeSTM32.desiredNodeID = 60;	//0x01;
-	canOpenNodeSTM32.baudrate = 1000;		//1Mbps
-	canopen_app_init(&canOpenNodeSTM32);
-	TPDO1_rx_init();
+    //motors.init_status_led(LD_ZER_ERR_GPIO_Port, LD_ZER_ERR_Pin, GPIO_PIN_RESET);
+    motors.add_motor(
+        3 , 
+        ROT_CW  ,
+        60  ,
+        174763, 
+        174763,
+        2048);
 
-	CO_NMT_t *NMTmaster = CO->NMT;
-	NMTmaster->internalCommand = CO_NMT_ENTER_OPERATIONAL;
+    Zer_All_init_flag = INIT_INFO_DEFAULT_POSI_START;
 
-	motors.motorsInit(CO, 1, 12);
-
-	//motors.init_status_led(LD_ZER_ERR_GPIO_Port, LD_ZER_ERR_Pin, GPIO_PIN_RESET);
-	motors.add_motor(
-		3 , 
-		ROT_CW  ,
-		60  ,
-		174763, 
-		174763,
-		2048);
-
-	Zer_All_init_flag = INIT_INFO_DEFAULT_POSI_START;
-
-
-	while(1){
-
+    while(1){
 #ifdef CANOPEN_MODE
-
-
-
-		osStatus_t status;
-		status = osMessageQueueGet(zerCmd_rxHandle, &cmd_rx, NULL, 0U); // wait for message
-		if (status == osOK) {
-			mrs_zerrx_cmd_process(&cmd_rx);
-			zerRxMotion = t_ZerRxMotion.getTickCount();
-		}
-
-		ZER_Init_Process();
-
-
-		for(int time = 0; time < 9; time++ ){
-		    do {
-		    	status = osMessageQueueGet(zerPosiHandle, &motionMsg, NULL, 0U); // wait for message
-
-		        if (status == osOK) {
-		        	motors.setPosition(motionMsg.sid, motionMsg.posi);
-					os_rx_cnt++;
-					zerRxMotion = t_ZerRxMotion.getTickCount();
-				}
-		    } while (status == osOK); // 큐가 비어있지 않는 동안 계속 반복
-			osDelay(1);
-		}
-
-		if(t_ZerRxMotion.elapsed(zerRxMotion) >= 37000){
-			zer_statusFaultCheck();
-			zerRxMotion = t_ZerRxMotion.getTickCount();
-		}
-	}
+        mrsComm.processCommandQueue();
+        mrsComm.processPositionQueue();
+        mrsComm.checkCommunicationStatus();
+        ZER_Init_Process();
+#endif
+    }
 }
 
 void ZER_Init_Process(void){
@@ -163,8 +148,6 @@ void ZER_Init_Process(void){
 	}
 }
 
-uint8_t zergid = 0;//240305
-uint8_t zerErrorTxCnt = 30;
 void zer_statusFaultCheck(void){
 
 	for(int i = 1; i <= 12; i++){
@@ -223,32 +206,6 @@ void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx) {
 
 		break;
 	}
-
-//	case MRS_RX_DATA2: {
-//		if (zerSetting[cmd_rx->sid].f_data1 != true)
-//			return;
-//
-//		prtc_data_ctl_init_driver_data2_t *pData = (prtc_data_ctl_init_driver_data2_t*) cmd_rx->data;
-//		zerSetting[cmd_rx->sid].tar_speed = pData->count;
-//		zerSetting[cmd_rx->sid].tar_acc = pData->rpm * 100;
-//
-//		motors.add_motor(
-//				cmd_rx->sid,
-//				zerSetting[cmd_rx->sid].rot_dir ,
-//				zerSetting[cmd_rx->sid].angle ,
-//				zerSetting[cmd_rx->sid].tar_speed,
-//				zerSetting[cmd_rx->sid].tar_acc,
-//				zerSetting[cmd_rx->sid].defult_posi);
-//
-//		BypassPacket_TypeDef msg;
-//		msg.gid = cmd_rx->gid;
-//		msg.sid = cmd_rx->sid;
-//		msg.cmd = MRS_TX_DATA2_ACK;
-//		memcpy(msg.data, (uint8_t *)pData, 8);
-//		osMessageQueuePut(zerCmd_txHandle, &msg, 0U, 0U);
-//
-//		break;
-//	}
 
 	case MRS_RX_DATA_OP: {
 			if (zerSetting[cmd_rx->sid].f_data1 != true)
@@ -318,13 +275,4 @@ void HAL_CAN_RxFifo0MsgPendingCallback_ByPass(CAN_HandleTypeDef *hcan)//231110 s
 }
 
 
-void CANopenNode_Init(void){
 
-	CANopenNodeSTM32 canOpenNodeSTM32;
-	canOpenNodeSTM32.CANHandle = &hcan2;
-	canOpenNodeSTM32.HWInitFunction = MX_CAN2_Init;
-	canOpenNodeSTM32.timerHandle = &htim14;
-	canOpenNodeSTM32.desiredNodeID = 60;	//0x01;
-	canOpenNodeSTM32.baudrate = 1000;		//1Mbps
-	canopen_app_init(&canOpenNodeSTM32);
-}
