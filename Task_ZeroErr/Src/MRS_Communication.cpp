@@ -14,6 +14,10 @@ MRS_Communication::MRS_Communication() :
     zerErrorTxCnt(30),
     os_rx_cnt(0)
 {
+    // 초기화 시 모든 모터의 설정 변경 플래그를 false로 설정
+    for (int i = 0; i <= 12; i++) {
+        zerSetting[i].settings_changed = false;
+    }
 }
 
 MRS_Communication::~MRS_Communication()
@@ -138,11 +142,20 @@ void MRS_Communication::processCommandMessage(BypassPacket_TypeDef* cmd_rx)
     switch (cmd_rx->cmd) {
         case MRS_RX_DATA1: {
             prtc_data_ctl_init_driver_data1_t *pData = (prtc_data_ctl_init_driver_data1_t*) cmd_rx->data;
-
-            zerSetting[cmd_rx->sid].rot_dir = (pData->direction == 0 ? ROT_CW : ROT_CCW);
-            zerSetting[cmd_rx->sid].angle = (float) pData->angle / 100;
-            zerSetting[cmd_rx->sid].defult_posi = pData->init_position;
-            zerSetting[cmd_rx->sid].f_data1 = true;
+            
+            zerSetting[cmd_rx->sid].settings_changed = false;
+            
+            if (zerSetting[cmd_rx->sid].rot_dir != (pData->direction == 0 ? ROT_CW : ROT_CCW) ||
+                zerSetting[cmd_rx->sid].angle != (float) pData->angle / 100 ||
+                zerSetting[cmd_rx->sid].defult_posi != pData->init_position ||
+                zerSetting[cmd_rx->sid].f_data1 != true) {
+                
+                zerSetting[cmd_rx->sid].rot_dir = (pData->direction == 0 ? ROT_CW : ROT_CCW);
+                zerSetting[cmd_rx->sid].angle = (float) pData->angle / 100;
+                zerSetting[cmd_rx->sid].defult_posi = pData->init_position;
+                zerSetting[cmd_rx->sid].f_data1 = true;
+                zerSetting[cmd_rx->sid].settings_changed = true;
+            }
 
             sendAckMessage(cmd_rx->sid, MRS_TX_DATA1_ACK, pData);
             break;
@@ -153,8 +166,14 @@ void MRS_Communication::processCommandMessage(BypassPacket_TypeDef* cmd_rx)
                 return;
 
             prtc_data_ctl_init_driver_data_op_zero_err_t *pData = (prtc_data_ctl_init_driver_data_op_zero_err_t*) cmd_rx->data;
-            zerSetting[cmd_rx->sid].tar_speed = pData->profile_target_speed;
-            zerSetting[cmd_rx->sid].tar_acc = pData->profile_acc_cnt;
+            
+            if (zerSetting[cmd_rx->sid].tar_speed != pData->profile_target_speed ||
+                zerSetting[cmd_rx->sid].tar_acc != pData->profile_acc_cnt) {
+                
+                zerSetting[cmd_rx->sid].tar_speed = pData->profile_target_speed;
+                zerSetting[cmd_rx->sid].tar_acc = pData->profile_acc_cnt;
+                zerSetting[cmd_rx->sid].settings_changed = true;
+            }
 
             motors.add_motor(
                 cmd_rx->sid,
@@ -164,25 +183,27 @@ void MRS_Communication::processCommandMessage(BypassPacket_TypeDef* cmd_rx)
                 zerSetting[cmd_rx->sid].tar_acc,
                 zerSetting[cmd_rx->sid].defult_posi);
 
-
-            if( motors.init_motor(cmd_rx->sid) == 1){
+            if (zerSetting[cmd_rx->sid].settings_changed && motors.init_motor(cmd_rx->sid) == 1) {
+                zerSetting[cmd_rx->sid].settings_changed = false;  // 초기화 성공 후 플래그 리셋
                 sendAckMessage(cmd_rx->sid, MRS_TX_DATA_OP_ACK, pData);
-			}
-            else{
+            }
+            else if (!zerSetting[cmd_rx->sid].settings_changed) {
+                sendAckMessage(cmd_rx->sid, MRS_TX_DATA_OP_ACK, pData);
+            }
+            else {
                 sendAckMessage(cmd_rx->sid, MRS_TX_DATA_OP_FAIL, pData);
             }
-
             
             break;
         }
 
         case MRS_RX_MOVE_DEFAULT_POSI: {
-            if(cmd_rx->sid == 12) {
-                if(zerSetting[cmd_rx->sid].f_data1 == true) {
-                    motors.init_default_posi(cmd_rx->sid);
-                    zerSetting[cmd_rx->sid].f_data1 = false;
-                } 
-            }
+
+			if(zerSetting[cmd_rx->sid].f_data1 == true) {
+				motors.init_default_posi(cmd_rx->sid);
+				zerSetting[cmd_rx->sid].f_data1 = false;
+			}
+
             break;
         }
 

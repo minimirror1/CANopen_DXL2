@@ -8,6 +8,8 @@
 #ifndef INC_MAIN_ZEROERR_H_
 #define INC_MAIN_ZEROERR_H_
 
+#include <stdint.h>    // uint8_t, uint32_t 타입 정의
+#include <stdbool.h>   // bool 타입 정의
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +25,8 @@ typedef struct _ZerSetting_TypeDef{
 	/*data2*/
 	uint32_t tar_speed;
 	uint32_t tar_acc;
+	/*상태 추적*/
+	bool settings_changed;  // 설정이 변경되었는지 추적하는 플래그
 }ZerSetting_TypeDef;
 
 
