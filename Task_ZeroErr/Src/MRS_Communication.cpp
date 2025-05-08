@@ -95,13 +95,36 @@ void MRS_Communication::sendErrorMessage(uint8_t sid, const char* errorCode)
     osMessageQueuePut(zerCmd_txHandle, &msg, 0U, 0U);
 }
 
+
+
+// sendAckMessage 함수 사용 예시:
+//
+// 1. 기본 사용법 (데이터 없이 응답만 보내기)
+// sendAckMessage(1, MRS_TX_DATA1_ACK, nullptr);
+//
+// 2. 데이터와 함께 응답 보내기
+// prtc_data_ctl_init_driver_data1_t responseData;
+// responseData.direction = 1;
+// responseData.angle = 90;
+// sendAckMessage(1, MRS_TX_DATA1_ACK, &responseData);
+//
+// 3. 에러 응답 보내기
+// sendAckMessage(1, MRS_TX_DATA_OP_FAIL, nullptr);
+//
+// 매개변수 설명:
+// - sid: 대상 모터 ID (1~12)
+// - cmd: 응답 명령어 타입 (MRS_TX_로 시작하는 매크로)
+// - data: 전송할 데이터 포인터 (최대 8바이트, nullptr 가능)
+
 void MRS_Communication::sendAckMessage(uint8_t sid, uint8_t cmd, void* data)
 {
     BypassPacket_TypeDef msg = {0,};
     msg.gid = zergid;
     msg.sid = sid;
     msg.cmd = cmd;
-    memcpy(msg.data, (uint8_t *)data, 8);
+    if (data != nullptr) {
+        memcpy(msg.data, (uint8_t *)data, 8);
+    }
     osMessageQueuePut(zerCmd_txHandle, &msg, 0U, 0U);
 }
 
@@ -141,29 +164,33 @@ void MRS_Communication::processCommandMessage(BypassPacket_TypeDef* cmd_rx)
                 zerSetting[cmd_rx->sid].tar_acc,
                 zerSetting[cmd_rx->sid].defult_posi);
 
-            sendAckMessage(cmd_rx->sid, MRS_TX_DATA_OP_ACK, pData);
+
+            if( motors.init_motor(cmd_rx->sid) == 1){
+                sendAckMessage(cmd_rx->sid, MRS_TX_DATA_OP_ACK, pData);
+			}
+            else{
+                sendAckMessage(cmd_rx->sid, MRS_TX_DATA_OP_FAIL, pData);
+            }
+
+            
             break;
         }
 
         case MRS_RX_MOVE_DEFAULT_POSI: {
             if(cmd_rx->sid == 12) {
                 if(zerSetting[cmd_rx->sid].f_data1 == true) {
-                    Zer_All_init_flag = INIT_INFO_DEFAULT_POSI_START;
+                    motors.init_default_posi(cmd_rx->sid);
                     zerSetting[cmd_rx->sid].f_data1 = false;
-                } else {
-                    Zer_All_init_flag = INIT_DEFAULT_POSI_START;
-                }
+                } 
             }
             break;
         }
 
         case MRS_RX_MOVE_DEFAULT_POSI_CHECK: {
-            if(Zer_All_init_flag == INIT_OK) {
-                BypassPacket_TypeDef msg = {0,};
-                msg.gid = cmd_rx->gid;
-                msg.sid = cmd_rx->sid;
-                msg.cmd = MRS_TX_MOVE_DEFAULT_POSI_CHECK;
-                osMessageQueuePut(zerCmd_txHandle, &msg, 0U, 0U);
+
+            if(motors.getOperatingMode(cmd_rx->sid) == Op_STATUS_OPERATING) {
+
+                sendAckMessage(cmd_rx->sid, MRS_TX_MOVE_DEFAULT_POSI_CHECK, nullptr);
             }
             break;
         }

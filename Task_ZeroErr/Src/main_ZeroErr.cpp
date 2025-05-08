@@ -98,27 +98,27 @@ void main_ZeroErr(void *argument){
     motors.motorsInit(CO, 1, 30);
 
     //motors.init_status_led(LD_ZER_ERR_GPIO_Port, LD_ZER_ERR_Pin, GPIO_PIN_RESET);
-    motors.add_motor(
-        3 , 
-        ROT_CW  ,
-        359  ,
-        174763, 
-        174763,
-        4095);
-
-    motors.add_motor(
-        4 ,
-        ROT_CW  ,
-        359  ,
-        174763,
-        174763,
-        4095);
-
-    motors.init_motor(3);
-    motors.init_motor(4);
-
-	motors.init_default_posi(3);
-	motors.init_default_posi(4);
+//    motors.add_motor(
+//        3 ,
+//        ROT_CW  ,
+//        359  ,
+//        174763,
+//        174763,
+//        0);
+//
+//    motors.add_motor(
+//        4 ,
+//        ROT_CW  ,
+//        359  ,
+//        174763,
+//        174763,
+//        0);
+//
+//    motors.init_motor(3);
+//    motors.init_motor(4);
+//
+//	motors.init_default_posi(3);
+//	motors.init_default_posi(4);
 
     //Zer_All_init_flag = INIT_INFO_DEFAULT_POSI_START;
 
@@ -237,6 +237,10 @@ void mrs_zerrx_cmd_process(BypassPacket_TypeDef *cmd_rx) {
 					zerSetting[cmd_rx->sid].tar_speed,
 					zerSetting[cmd_rx->sid].tar_acc,
 					zerSetting[cmd_rx->sid].defult_posi);
+
+			if( motors.init_motor(cmd_rx->sid) == 1){
+				Zer_All_init_flag = INIT_OK;
+			}
 
 			BypassPacket_TypeDef msg;
 			msg.gid = cmd_rx->gid;

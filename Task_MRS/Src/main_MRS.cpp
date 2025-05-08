@@ -67,7 +67,7 @@ void main_MRS(void *argument){
 
 
 	set_my_can_id(MRS_ZER_id);
-	add_my_can_sub_id(1, 28);
+	add_my_can_sub_id(1, 30);
 
 	/* MRS Boot msg */
 	app_tx_init_sub_pid_boot_ctl(
@@ -145,7 +145,7 @@ void proc_can_rx(void)
 
 void mrs_tx_cmd_process(BypassPacket_TypeDef *cmd_tx){
 
-	if (cmd_tx->sid > 12)
+	if (cmd_tx->sid > 30)
 			return;
 
 		switch (cmd_tx->cmd) {
