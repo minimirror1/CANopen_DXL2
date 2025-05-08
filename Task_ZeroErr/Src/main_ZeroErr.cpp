@@ -127,7 +127,8 @@ void main_ZeroErr(void *argument){
         mrsComm.processCommandQueue();
         mrsComm.processPositionQueue();
         mrsComm.checkCommunicationStatus();
-        ZER_Init_Process();
+        mrsComm.processMovePosition();
+        //ZER_Init_Process();
 
         motors.default_posi_check_process();
 #endif

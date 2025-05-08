@@ -1,5 +1,5 @@
 #include "MRS_Communication.h"
-#include "string.h"
+#include <cstring>
 #include "main_MRS.h"
 
 extern osMessageQueueId_t zerPosiHandle;
@@ -7,6 +7,7 @@ extern osMessageQueueId_t zerCmd_rxHandle;
 extern osMessageQueueId_t zerCmd_txHandle;
 extern Motors motors;
 extern Init_TypeDef Zer_All_init_flag;
+extern CO_t* CO;
 
 MRS_Communication::MRS_Communication() : 
     zerRxMotion(0),
@@ -54,6 +55,14 @@ void MRS_Communication::processPositionQueue()
     }
 }
 
+void MRS_Communication::processMovePosition()
+{
+    motors.movePosition();
+	send_RPDO_BuffSend(CO);
+	osDelay(1);
+	send_sync(CO);
+}
+	
 void MRS_Communication::checkCommunicationStatus()
 {
     if(t_ZerRxMotion.elapsed(zerRxMotion) >= 37000) {

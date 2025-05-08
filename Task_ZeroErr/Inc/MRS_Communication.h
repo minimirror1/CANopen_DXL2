@@ -34,6 +34,7 @@ public:
 
     void processCommandQueue();
     void processPositionQueue();
+    void processMovePosition();
     void checkCommunicationStatus();
     void handleErrorStatus(uint8_t sid, ZER_StatusCheck_TypeDef status);
 
