@@ -708,6 +708,15 @@ public :
 		send_RPDO_1(co_, id_, buff, 6);
 	}
 
+	void send_RPDO_1_Control_Position_Buff(uint16_t controlword, uint32_t targetPosition){
+		uint8_t buff[8] = {0,};
+		memcpy(buff, &controlword, sizeof(controlword));
+		memcpy(buff + sizeof(controlword), &targetPosition, sizeof(targetPosition));
+		send_RPDO_1_Buff(co_, id_, buff, 6);
+	}
+
+
+	//RPDO_1, RPDO_2
 	void send_RPDO_1_Control(uint16_t controlword){
 		uint8_t buff[8] = {0,};
 		memcpy(buff, &controlword, sizeof(controlword));
@@ -723,12 +732,7 @@ public :
 	}
 
 
-	void send_RPDO_1_Control_Position_Buff(uint16_t controlword, uint32_t targetPosition){
-		uint8_t buff[8] = {0,};
-		memcpy(buff, &controlword, sizeof(controlword));
-		memcpy(buff + sizeof(controlword), &targetPosition, sizeof(targetPosition));
-		send_RPDO_1_Buff(co_, id_, buff, 6);
-	}
+
 
 	//_set controlword 0x6040
 	CO_SDO_abortCode_t SDO_write_ControlWord(uint16_t controlWord) {
@@ -796,21 +800,20 @@ public :
 		osDelay(10);
 #endif
 		//2 [Enable voltage], [Quick stop]
-		send_RPDO_1_Control(0x26);
-		send_RPDO_BuffSend(co_);
+		//send_RPDO_1_Control(0x26);
+		send_RPDO_1_Control_Position(0x26, 0x00);
 		Sync();
 		osDelay(10);
 
 		//3 [Switch on], Enable voltage, Quick stop, [operation enable]
-		send_RPDO_1_Control(0x27);
-		send_RPDO_BuffSend(co_);
+		//send_RPDO_1_Control(0x27);
+		send_RPDO_1_Control_Position(0x27, 0x00);
 		Sync();
 		osDelay(10);
 
 		//4 [ready to switch on], Switch on, Enable voltage, Quick stop, operation enable, [quick stop]
-		send_RPDO_2_TargetPosition(1000);
-		send_RPDO_BuffSend(co_);
-		send_RPDO_1_Control(0x2F);
+		//send_RPDO_2_TargetPosition(1000);
+		send_RPDO_1_Control_Position(0x2F, 0x00);
 		Sync();
 		osDelay(10);
 
@@ -822,6 +825,7 @@ public :
 
 	void DisableCANopen(void){
 		// Enable voltage, Quick stop
+		//send_RPDO_1_Control_Position(0x06, 0x00);
 		send_RPDO_1_Control_Position(0x06, 0x00);
 	}
 
@@ -1150,14 +1154,9 @@ public :
 		}
 
 		
-		send_RPDO_1_Control(0x2F);
-		send_RPDO_BuffSend(co_);
+		send_RPDO_1_Control_Position(0x2F, current_position);
+		send_RPDO_1_Control_Position(0x103F, current_position);
 
-		send_RPDO_2_TargetPosition(current_position);
-		send_RPDO_BuffSend(co_);
-
-		send_RPDO_1_Control(0x103F);
-		send_RPDO_BuffSend(co_);
 
 
 #elif CANOPEN_MODE == SDO_PP
@@ -1331,10 +1330,9 @@ public :
 		}
 		commend_position = current_position + error_position;
 		if(old_position !=commend_position){
-			send_RPDO_2_TargetPosition(commend_position);
-			send_RPDO_BuffSend(co_);
-			send_RPDO_1_Control(0x103F);
-			send_RPDO_BuffSend(co_);
+
+			send_RPDO_1_Control_Position(0x103F, commend_position);
+			
 			rpdo1_val = 0x3F;
 			new_trigger = 1;
 
@@ -1495,10 +1493,7 @@ public :
 #if	CANOPEN_MODE == PDO_CSP
 			send_RPDO_1_Control_Position_Buff(0x1F, Curve_CalcHermiteY());
 #elif CANOPEN_MODE == PDO_PP
-			send_RPDO_2_TargetPosition(calc_herm);
-			send_RPDO_BuffSend(co_);
-			send_RPDO_1_Control(0x3F);
-			send_RPDO_BuffSend(co_);
+			send_RPDO_1_Control_Position(0x103F, calc_herm);
 			last_cmd = calc_herm;
 #elif CANOPEN_MODE == SDO_PP
 
@@ -1507,18 +1502,6 @@ public :
 
 	}
 
-	void set_Control_bit4(uint8_t bit4)
-	{
-		if(OpStatus == Op_STATUS_NONE)
-			return;
-
-		if(bit4 == 1){
-			send_RPDO_1_Control(0x103F);
-			send_RPDO_BuffSend(co_);
-		}			
-		//else
-		//	send_RPDO_1_Control(0x2F);
-	}
 
 	int32_t Curve_CalcHermiteY(void)
 	{
@@ -1691,15 +1674,6 @@ public:
 
     	while(1){
 
-			for(int i = idMin_; i <= idMax_; i++){
-				motors_[i].set_Control_bit4(0);
-			}
-			send_RPDO_BuffSend(co_);
-			osDelay(1);
-			send_sync(co_);
-			osDelay(9);
-
-
     		for(int i = idMin_; i <= idMax_; i++){
 				motors_[i].Move_Default_Posi();
 			}
@@ -1751,13 +1725,6 @@ public:
 
 		while(1){
 
-			for(int i = idMin_; i <= idMax_; i++){
-				motors_[i].set_Control_bit4(0);
-			}
-			send_RPDO_BuffSend(co_);
-			osDelay(1);
-			send_sync(co_);
-			osDelay(9);
 
 
 			for(int i = idMin_; i <= idMax_; i++){
@@ -1801,12 +1768,6 @@ public:
 		}
     }
 
-    void setAllControlbit(){
-    	for(int i = idMin_; i <= idMax_; i++){
-			motors_[i].set_Control_bit4(0);
-		}
-		send_RPDO_BuffSend(co_);
-    }
 
     void PP_mode_send(){
     	for(int i = idMin_; i <= idMax_; i++)
@@ -1895,7 +1856,6 @@ public:
                 }
                 
                 // 현재 커브 진행 상황에 따라 이동 명령 수행
-                motors_[i].set_Control_bit4(0);
                 motors_[i].Move_Default_Posi();
                 
                 // 커브 이동이 완료되었는지 확인
