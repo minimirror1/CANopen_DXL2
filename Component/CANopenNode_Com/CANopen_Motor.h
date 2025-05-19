@@ -492,6 +492,7 @@ public :
 		CO_SDO_abortCode_t abort;
 
 		//Disable RxPDO_1
+		// Receive PDO Communication 1 - COB ID used by PDO, expedited
 		writebuff_4 = CO_301_MASK_RPDO_1_COB_ID_DISABLE + id_;
 		abort = write_SDO(
 				co_->SDOclient,
@@ -504,6 +505,7 @@ public :
 		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_1_COB_ID, (abort == CO_SDO_AB_NONE)?"success":"fail");
 
 		//Defines the transmission type
+		//[0x1400,0x02] Receive PDO Communication 1 - Transmission Type, expedited
 		writebuff_1 = CO_301_VALUE_RPDO_1_TRANSMISSION_TYPE;
 		abort = write_SDO(
 				co_->SDOclient,
@@ -513,7 +515,7 @@ public :
 				(uint8_t *)&writebuff_1,
 				sizeof(writebuff_1)
 				);
-		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_1_TRANSMISSION_TYPE, (abort == CO_SDO_AB_NONE)?"success":"fail");
+		printf("write node %d index 0x%X sub 0x%X %s\n", id_, CO_301_INDEX_RPDO_1_TRANSMISSION_TYPE, CO_301_SUBINDEX_RPDO_1_TRANSMISSION_TYPE, (abort == CO_SDO_AB_NONE)?"success":"fail");
 
 		//Defines the number of valid entries in the mapping record
 		writebuff_1 = CO_301_VALUE_RPDO_NUMBER_OF_MAP_0;
@@ -1374,7 +1376,7 @@ public :
 
 		if(new_trigger == 1)
 		{
-			send_RPDO_1_Control(0x2F);
+			//send_RPDO_1_Control(0x2F);
 			rpdo1_val = 0x2F;
 			new_trigger = 0;
 			return;
@@ -1383,7 +1385,7 @@ public :
 		error_position = target_position - current_position;
 
 		if(abs(error_position) < 5 && rpdo1_val == 0x3F){
-			send_RPDO_1_Control(0x2F);
+			//send_RPDO_1_Control(0x2F);
 			rpdo1_val = 0x2F;
 			new_trigger = 0;
 			return;
@@ -1391,7 +1393,9 @@ public :
 		commend_position = current_position + error_position;
 		if(old_position !=commend_position){
 			send_RPDO_2_TargetPosition(commend_position);
-			send_RPDO_1_Control(0x3F);
+			send_RPDO_BuffSend(co_);
+			send_RPDO_1_Control(0x103F);
+			send_RPDO_BuffSend(co_);
 			rpdo1_val = 0x3F;
 			new_trigger = 1;
 
@@ -1553,7 +1557,9 @@ public :
 			send_RPDO_1_Control_Position_Buff(0x1F, Curve_CalcHermiteY());
 #elif CANOPEN_MODE == PDO_PP
 			send_RPDO_2_TargetPosition(calc_herm);
+			send_RPDO_BuffSend(co_);
 			send_RPDO_1_Control(0x3F);
+			send_RPDO_BuffSend(co_);
 			last_cmd = calc_herm;
 #elif CANOPEN_MODE == SDO_PP
 
@@ -1567,10 +1573,12 @@ public :
 		if(OpStatus == Op_STATUS_NONE)
 			return;
 
-		if(bit4 == 1)
-			send_RPDO_1_Control(0x3F);
-		else
-			send_RPDO_1_Control(0x2F);
+		if(bit4 == 1){
+			send_RPDO_1_Control(0x103F);
+			send_RPDO_BuffSend(co_);
+		}			
+		//else
+		//	send_RPDO_1_Control(0x2F);
 	}
 
 	int32_t Curve_CalcHermiteY(void)
