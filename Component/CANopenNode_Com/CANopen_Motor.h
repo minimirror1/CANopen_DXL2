@@ -541,8 +541,20 @@ public :
 				);
 		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_1_MAPPING_ENTRY_1, (abort == CO_SDO_AB_NONE)?"success":"fail");
 
-		//the number of valid entries in the mapping record : 1
-		writebuff_1 = CO_301_VALUE_RPDO_NUMBER_OF_MAP_1;
+		//0x607A:00h(target position)size(0x20:32bit)
+		writebuff_4 = CO_301_VALUE_RPDO_MAPPING_ENTRY_2_IND + CO_301_VALUE_RPDO_MAPPING_ENTRY_2_SUBIND + CO_301_VALUE_RPDO_MAPPING_ENTRY_2_SIZE;
+		abort = write_SDO(
+				co_->SDOclient,
+				id_,
+				CO_301_INDEX_RPDO_1_MAPPING_ENTRY_1,
+				CO_301_SUBINDEX_RPDO_MAPPING_ENTRY_2,
+				(uint8_t *)&writebuff_4,
+				sizeof(writebuff_4)
+				);
+		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_1_MAPPING_ENTRY_1, (abort == CO_SDO_AB_NONE)?"success":"fail");
+
+		//the number of valid entries in the mapping record : 2	
+		writebuff_1 = CO_301_VALUE_RPDO_NUMBER_OF_MAP_2;
 		abort = write_SDO(
 				co_->SDOclient,
 				id_,
@@ -564,81 +576,8 @@ public :
 				sizeof(writebuff_4)
 				);
 		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_1_COB_ID, (abort == CO_SDO_AB_NONE)?"success":"fail");
-		//return abort;
-
-		printf("RxPDO_2 Setting\n");
-		//Disable RxPDO_2
-		writebuff_4 = CO_301_MASK_RPDO_2_COB_ID_DISABLE + id_;
-		abort = write_SDO(
-				co_->SDOclient,
-				id_,
-				CO_301_INDEX_RPDO_2_COB_ID,
-				CO_301_SUBINDEX_RPDO_2_COB_ID,
-				(uint8_t *)&writebuff_4,
-				sizeof(writebuff_4)
-				);
-		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_2_COB_ID, (abort == CO_SDO_AB_NONE)?"success":"fail");
-
-		//Defines the transmission type
-		writebuff_1 = CO_301_VALUE_RPDO_2_TRANSMISSION_TYPE;
-		abort = write_SDO(
-				co_->SDOclient,
-				id_,
-				CO_301_INDEX_RPDO_2_TRANSMISSION_TYPE,
-				CO_301_SUBINDEX_RPDO_2_TRANSMISSION_TYPE,
-				(uint8_t *)&writebuff_1,
-				sizeof(writebuff_1)
-				);
-		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_2_TRANSMISSION_TYPE, (abort == CO_SDO_AB_NONE)?"success":"fail");
-
-		//Defines the number of valid entries in the mapping record
-		writebuff_1 = CO_301_VALUE_RPDO_NUMBER_OF_MAP_0;
-		abort = write_SDO(
-				co_->SDOclient,
-				id_,
-				CO_301_INDEX_RPDO_2_NUMBER_OF_MAP,
-				CO_301_SUBINDEX_RPDO_NUMBER_OF_MAP,
-				(uint8_t *)&writebuff_1,
-				sizeof(writebuff_1)
-				);
-		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_2_NUMBER_OF_MAP, (abort == CO_SDO_AB_NONE)?"success":"fail");
-
-		//0x607A:00h(target position)size(0x20:32bit)
-		writebuff_4 = CO_301_VALUE_RPDO_MAPPING_ENTRY_2_IND + CO_301_VALUE_RPDO_MAPPING_ENTRY_2_SUBIND + CO_301_VALUE_RPDO_MAPPING_ENTRY_2_SIZE;
-		abort = write_SDO(
-				co_->SDOclient,
-				id_,
-				CO_301_INDEX_RPDO_2_MAPPING_ENTRY_1,
-				CO_301_SUBINDEX_RPDO_MAPPING_ENTRY_1,
-				(uint8_t *)&writebuff_4,
-				sizeof(writebuff_4)
-				);
-		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_2_MAPPING_ENTRY_1, (abort == CO_SDO_AB_NONE)?"success":"fail");
-
-		//the number of valid entries in the mapping record : 1
-		writebuff_1 = CO_301_VALUE_RPDO_NUMBER_OF_MAP_1;
-		abort = write_SDO(
-				co_->SDOclient,
-				id_,
-				CO_301_INDEX_RPDO_2_NUMBER_OF_MAP,
-				CO_301_SUBINDEX_RPDO_NUMBER_OF_MAP,
-				(uint8_t *)&writebuff_1,
-				sizeof(writebuff_1)
-				);
-		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_2_NUMBER_OF_MAP, (abort == CO_SDO_AB_NONE)?"success":"fail");
-
-		//Enable RxPDO_1
-		writebuff_4 = CO_301_MASK_RPDO_2_COB_ID_ENABLE + id_;
-		abort = write_SDO(
-				co_->SDOclient,
-				id_,
-				CO_301_INDEX_RPDO_2_COB_ID,
-				CO_301_SUBINDEX_RPDO_2_COB_ID,
-				(uint8_t *)&writebuff_4,
-				sizeof(writebuff_4)
-				);
-		printf("write node %d index 0x%X %s\n", id_, CO_301_INDEX_RPDO_2_COB_ID, (abort == CO_SDO_AB_NONE)?"success":"fail");
 		return abort;
+
 #if 0
 		//Disable RxPDO_1
 		writebuff_4 = CO_301_MASK_RPDO_1_COB_ID_DISABLE + id_;
