@@ -738,7 +738,10 @@ public :
 				sizeof(readbuff),
 				&readSize
 				);
+
+		f_current_position = false;
 		if(abort == CO_SDO_AB_NONE){
+			f_current_position = true;
 			current_position = readbuff;
 		}
 		printf("read node %d index 0x%X %s position %d\n", id_, CO_402_INDEX_ACTUAL_POSITION_VALUE, (abort == CO_SDO_AB_NONE)?"success":"fail", (int)readbuff);
@@ -746,10 +749,8 @@ public :
 	}
 
 	//9_start remote node_CANopen
-	void StartRemoteNode(void) {
-		osDelay(500);
-		NMT_send_OP();
-		osDelay(500);
+	void StartRemoteNode(void) {		
+		NMT_send_OP();		
 	}
 
 	//10_sync command_CANopen
@@ -944,7 +945,9 @@ public :
 		/* Stop the node and configure the relevant parameters */
 		//1_Stop remote node_CANopen
 		NMT_send_STOP();
+		osDelay(500);
 		//2_reset comm_CANopen
+		
 		NMT_send_ResetComm();
 		//3_Set the profile position mode
 
@@ -953,7 +956,7 @@ public :
 		//send_RPDO_BuffSend(co_);
 		//Sync();
 		init_msg_cnt++;
-		printf("1_ControlWord\n");
+		printf("ControlWord : 0x27\n");
 		for (int retryCount = 0; retryCount < 5; ++retryCount) {
 			abort = SDO_write_ControlWord(0x27);
 			init_tx_cnt++;
@@ -974,7 +977,7 @@ public :
 		//send_RPDO_1_Control(0x26);
 		//send_RPDO_BuffSend(co_);
 		//Sync();
-		printf("2_ControlWord\n");
+		printf("ControlWord : 0x26\n");
 		init_msg_cnt++;
 		for (int retryCount = 0; retryCount < 5; ++retryCount) {
 			abort = SDO_write_ControlWord(0x26);
@@ -992,14 +995,28 @@ public :
 		}
 		osDelay(10);
 
+		printf("ControlWord : 0x80\n");
+		init_msg_cnt++;
+		for (int retryCount = 0; retryCount < 5; ++retryCount) {
+			abort = SDO_write_ControlWord(0x80);
+			init_tx_cnt++;
+			if (abort == CO_SDO_AB_NONE) {
+				break; // 성공하면 루프 탈출
+			} else {
+				osDelay(CAN_RETRY_DELAY); // 실패한 경우 재시도 전에 딜레이 추가 (필요에 따라 조정)
+				if(retryCount >= 4){
+					OpStatus = Op_STATUS_CANOPEN_FAIL;
+					abort = CO_SDO_AB_TIMEOUT;
+					return abort;
+				}
+			}
+		}
+		osDelay(10);
 
+		NMT_send_PRE_OP();
+		printf("Error Reset complete\n");
 
 		/* Stop the node and configure the relevant parameters */
-		//1_Stop remote node_CANopen
-		NMT_send_STOP();
-		//2_reset comm_CANopen
-		NMT_send_ResetComm();
-		//3_Set the profile position mode
 		init_msg_cnt++;
 		for (int retryCount = 0; retryCount < 5; ++retryCount) {
 			abort = SDO_write_ModesOfOperation(PROFILE_POSITION_MODE);
@@ -1034,42 +1051,12 @@ public :
 			}
 		}
 
-		init_msg_cnt++;
-		for (int retryCount = 0; retryCount < 5; ++retryCount) {
-			abort = SDO_write_ControlWord(0x80);
-			init_tx_cnt++;
-			if (abort == CO_SDO_AB_NONE) {
-				break; // 성공하면 루프 탈출
-			} else {
-				osDelay(CAN_RETRY_DELAY); // 실패한 경우 재시도 전에 딜레이 추가 (필요에 따라 조정)
-				if(retryCount >= 4){
-					OpStatus = Op_STATUS_CANOPEN_FAIL;
-					abort = CO_SDO_AB_TIMEOUT;
-					return abort;
-				}
-			}
-		}
-
 		//5_Set the profile velocity to 200,000 plus/s
 //		SDO_write_TargetVelocity(262144);
 //		SDO_write_ProfileVelocity(262144);
 //		SDO_write_ProfileAcceleration(436000);
 //		SDO_write_ProfileDeceleration(436000);
-		init_msg_cnt++;
-		for (int retryCount = 0; retryCount < 5; ++retryCount) {
-			abort = SDO_write_TargetVelocity(velocity_);
-			init_tx_cnt++;
-			if (abort == CO_SDO_AB_NONE) {
-				break; // 성공하면 루프 탈출
-			} else {
-				osDelay(CAN_RETRY_DELAY); // 실패한 경우 재시도 전에 딜레이 추가 (필요에 따라 조정)
-				if(retryCount >= 4){
-					OpStatus = Op_STATUS_CANOPEN_FAIL;
-					abort = CO_SDO_AB_TIMEOUT;
-					return abort;
-				}
-			}
-		}
+
 
 		init_msg_cnt++;
 		for (int retryCount = 0; retryCount < 5; ++retryCount) {
@@ -1106,41 +1093,6 @@ public :
 		init_msg_cnt++;
 		for (int retryCount = 0; retryCount < 5; ++retryCount) {
 			abort = SDO_write_ProfileDeceleration(acc_);
-			init_tx_cnt++;
-			if (abort == CO_SDO_AB_NONE) {
-				break; // 성공하면 루프 탈출
-			} else {
-				osDelay(CAN_RETRY_DELAY); // 실패한 경우 재시도 전에 딜레이 추가 (필요에 따라 조정)
-				if(retryCount >= 4){
-					OpStatus = Op_STATUS_CANOPEN_FAIL;
-					abort = CO_SDO_AB_TIMEOUT;
-					return abort;
-				}
-			}
-		}
-
-
-		//6_set communication disable sync
-		init_msg_cnt++;
-		for (int retryCount = 0; retryCount < 5; ++retryCount) {
-			abort = SDO_write_COBID_SYNC_SetNotSyncCANRevA();
-			init_tx_cnt++;
-			if (abort == CO_SDO_AB_NONE) {
-				break; // 성공하면 루프 탈출
-			} else {
-				osDelay(CAN_RETRY_DELAY); // 실패한 경우 재시도 전에 딜레이 추가 (필요에 따라 조정)
-				if(retryCount >= 4){
-					OpStatus = Op_STATUS_CANOPEN_FAIL;
-					abort = CO_SDO_AB_TIMEOUT;
-					return abort;
-				}
-			}
-		}
-
-		//7_Set communication cycle period 10,000us
-		init_msg_cnt++;
-		for (int retryCount = 0; retryCount < 5; ++retryCount) {
-			abort = SDO_write_SetSyncPeriod(10000);
 			init_tx_cnt++;
 			if (abort == CO_SDO_AB_NONE) {
 				break; // 성공하면 루프 탈출
@@ -1219,7 +1171,13 @@ public :
 		Sync();
 		osDelay(10);
 
-		EnableCANopen();
+
+
+
+
+		
+
+//		EnableCANopen();
 
 		//현 위치를 읽지 못 할경우 초기화 실패
 		if( f_current_position == false){
@@ -1249,6 +1207,16 @@ public :
 				OpStatus = Op_STATUS_CANOPEN_FAIL;
 			}
 		}
+
+		
+		send_RPDO_1_Control(0x2F);
+		send_RPDO_BuffSend(co_);
+
+		send_RPDO_2_TargetPosition(current_position);
+		send_RPDO_BuffSend(co_);
+
+		send_RPDO_1_Control(0x103F);
+		send_RPDO_BuffSend(co_);
 
 
 #elif CANOPEN_MODE == SDO_PP
